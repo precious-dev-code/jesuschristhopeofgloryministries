@@ -14,7 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      check_in_logs: {
+        Row: {
+          action_type: string
+          child_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          action_type: string
+          child_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          action_type?: string
+          child_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "check_in_logs_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      children: {
+        Row: {
+          child_name: string
+          created_at: string
+          id: string
+          last_action_at: string | null
+          parent_name: string
+          parent_phone: string
+          status: string
+        }
+        Insert: {
+          child_name: string
+          created_at?: string
+          id?: string
+          last_action_at?: string | null
+          parent_name: string
+          parent_phone: string
+          status?: string
+        }
+        Update: {
+          child_name?: string
+          created_at?: string
+          id?: string
+          last_action_at?: string | null
+          parent_name?: string
+          parent_phone?: string
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
