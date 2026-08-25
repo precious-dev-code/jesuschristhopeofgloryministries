@@ -145,6 +145,12 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+  --check-in: oklch(0.7 0.16 145);
+  --check-in-foreground: oklch(0.16 0.04 145);
+  --check-in-soft: oklch(0.32 0.06 145);
+  --check-out: oklch(0.68 0.19 27);
+  --check-out-foreground: oklch(0.16 0.05 27);
+  --check-out-soft: oklch(0.34 0.08 27);
 }
 
 @layer base {
