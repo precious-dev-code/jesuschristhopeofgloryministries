@@ -59,29 +59,36 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-check-in: var(--check-in);
+  --color-check-in-foreground: var(--check-in-foreground);
+  --color-check-in-soft: var(--check-in-soft);
+  --color-check-out: var(--check-out);
+  --color-check-out-foreground: var(--check-out-foreground);
+  --color-check-out-soft: var(--check-out-soft);
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --radius: 0.875rem;
+  /* Warm, friendly kiosk palette for a kids ministry check-in. */
+  --background: oklch(0.985 0.008 75);
+  --foreground: oklch(0.27 0.03 60);
+  --card: oklch(0.998 0.004 90);
+  --card-foreground: oklch(0.27 0.03 60);
+  --popover: oklch(0.998 0.004 90);
+  --popover-foreground: oklch(0.27 0.03 60);
+  --primary: oklch(0.55 0.11 185);
+  --primary-foreground: oklch(0.99 0.01 185);
+  --secondary: oklch(0.95 0.02 85);
+  --secondary-foreground: oklch(0.3 0.04 60);
+  --muted: oklch(0.95 0.012 85);
+  --muted-foreground: oklch(0.52 0.03 65);
+  --accent: oklch(0.93 0.04 85);
+  --accent-foreground: oklch(0.3 0.04 60);
+  --destructive: oklch(0.6 0.21 25);
+  --destructive-foreground: oklch(0.99 0.01 25);
+  --border: oklch(0.9 0.02 80);
+  --input: oklch(0.97 0.012 85);
+  --ring: oklch(0.55 0.11 185);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -95,6 +102,14 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+
+  /* Status action colors — explicit green / red the ushers asked for. */
+  --check-in: oklch(0.62 0.17 145);
+  --check-in-foreground: oklch(0.99 0.02 145);
+  --check-in-soft: oklch(0.95 0.05 145);
+  --check-out: oklch(0.58 0.2 27);
+  --check-out-foreground: oklch(0.99 0.02 27);
+  --check-out-soft: oklch(0.95 0.05 27);
 }
 
 .dark {
@@ -130,6 +145,12 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+  --check-in: oklch(0.7 0.16 145);
+  --check-in-foreground: oklch(0.16 0.04 145);
+  --check-in-soft: oklch(0.32 0.06 145);
+  --check-out: oklch(0.68 0.19 27);
+  --check-out-foreground: oklch(0.16 0.05 27);
+  --check-out-soft: oklch(0.34 0.08 27);
 }
 
 @layer base {
