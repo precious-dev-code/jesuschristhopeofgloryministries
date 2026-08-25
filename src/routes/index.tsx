@@ -5,28 +5,50 @@ import {
   queryOptions,
 } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { Search, LogIn, LogOut, MessageCircle, Users, Loader2, Check } from "lucide-react";
+import {
+  Search,
+  LogIn,
+  LogOut,
+  MessageCircle,
+  Users,
+  Loader2,
+  Check,
+  UserPlus,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { recordCheckAction } from "@/lib/checkin.functions";
+import { addChild } from "@/lib/children.functions";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type Child = Database["public"]["Tables"]["children"]["Row"];
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Kids Ministry Check-In" },
+      { title: "GloryGate Connect — Kids Ministry Check-In" },
       {
         name: "description",
         content:
-          "Mobile-friendly check-in and check-out for church kids ministry ushers.",
+          "GloryGate Connect: mobile check-in and check-out for Jesus Christ Hope of Glory Ministries kids ministry ushers.",
       },
-      { property: "og:title", content: "Kids Ministry Check-In" },
+      { property: "og:title", content: "GloryGate Connect" },
       {
         property: "og:description",
-        content: "Check in and check out children for church kids ministry.",
+        content:
+          "Check in and check out children at Jesus Christ Hope of Glory Ministries.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -139,33 +161,53 @@ function CheckInComponent() {
       {/* Sticky header with search */}
       <header className="sticky top-0 z-10 border-b border-border bg-card/90 backdrop-blur supports-[backdrop-filter]:bg-card/70">
         <div className="mx-auto max-w-xl px-4 pb-3 pt-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
               <Users className="h-5 w-5" />
             </div>
-            <div className="flex-1">
-              <h1 className="text-lg font-bold leading-tight tracking-tight">
-                Kids Ministry Check-In
+            <div className="min-w-0 flex-1">
+              <h1 className="truncate text-lg font-bold leading-tight tracking-tight">
+                GloryGate <span className="text-accent-foreground">Connect</span>
               </h1>
-              <p className="text-xs text-muted-foreground">
-                {counts.in} checked in · {counts.out} checked out
+              <p className="truncate text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                Jesus Christ Hope of Glory Ministries
               </p>
             </div>
           </div>
 
-          <div className="relative mt-3">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="search"
-              inputMode="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search child by name…"
-              className="h-11 w-full rounded-xl border border-border bg-input pl-10 pr-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            />
+          <div className="mt-3 flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="search"
+                inputMode="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search child by name…"
+                className="h-11 w-full rounded-xl border border-border bg-input pl-10 pr-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <Button
+              type="button"
+              onClick={() => setAddOpen(true)}
+              className="h-11 shrink-0 rounded-xl px-3 font-semibold"
+            >
+              <UserPlus className="h-4 w-4" />
+              <span className="hidden sm:inline">Add New Child</span>
+              <span className="sr-only sm:hidden">Add New Child</span>
+            </Button>
           </div>
+
+          <p
+            suppressHydrationWarning
+            className="mt-2 text-xs text-muted-foreground"
+          >
+            {counts.in} checked in · {counts.out} checked out
+          </p>
         </div>
       </header>
+
+      <AddChildDialog open={addOpen} onOpenChange={setAddOpen} />
 
       <main className="mx-auto max-w-xl px-4 py-4 pb-16">
         {filtered.length === 0 ? (

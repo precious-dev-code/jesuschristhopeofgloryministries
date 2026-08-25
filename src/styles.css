@@ -69,26 +69,26 @@
 
 :root {
   --radius: 0.875rem;
-  /* Warm, friendly kiosk palette for a kids ministry check-in. */
-  --background: oklch(0.985 0.008 75);
-  --foreground: oklch(0.27 0.03 60);
-  --card: oklch(0.998 0.004 90);
-  --card-foreground: oklch(0.27 0.03 60);
-  --popover: oklch(0.998 0.004 90);
-  --popover-foreground: oklch(0.27 0.03 60);
-  --primary: oklch(0.55 0.11 185);
-  --primary-foreground: oklch(0.99 0.01 185);
-  --secondary: oklch(0.95 0.02 85);
-  --secondary-foreground: oklch(0.3 0.04 60);
-  --muted: oklch(0.95 0.012 85);
-  --muted-foreground: oklch(0.52 0.03 65);
-  --accent: oklch(0.93 0.04 85);
-  --accent-foreground: oklch(0.3 0.04 60);
-  --destructive: oklch(0.6 0.21 25);
-  --destructive-foreground: oklch(0.99 0.01 25);
-  --border: oklch(0.9 0.02 80);
-  --input: oklch(0.97 0.012 85);
-  --ring: oklch(0.55 0.11 185);
+  /* GloryGate Connect — deep sanctuary navy with a warm gold accent. */
+  --background: oklch(0.98 0.006 250);
+  --foreground: oklch(0.24 0.045 265);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.24 0.045 265);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.24 0.045 265);
+  --primary: oklch(0.38 0.11 262);
+  --primary-foreground: oklch(0.99 0.005 262);
+  --secondary: oklch(0.95 0.015 258);
+  --secondary-foreground: oklch(0.3 0.06 262);
+  --muted: oklch(0.955 0.012 258);
+  --muted-foreground: oklch(0.52 0.03 262);
+  --accent: oklch(0.8 0.12 85);
+  --accent-foreground: oklch(0.26 0.06 70);
+  --destructive: oklch(0.58 0.2 27);
+  --destructive-foreground: oklch(0.99 0.01 27);
+  --border: oklch(0.9 0.015 258);
+  --input: oklch(0.975 0.008 258);
+  --ring: oklch(0.38 0.11 262);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -104,12 +104,12 @@
   --sidebar-ring: oklch(0.704 0.04 256.788);
 
   /* Status action colors — explicit green / red the ushers asked for. */
-  --check-in: oklch(0.62 0.17 145);
-  --check-in-foreground: oklch(0.99 0.02 145);
-  --check-in-soft: oklch(0.95 0.05 145);
-  --check-out: oklch(0.58 0.2 27);
-  --check-out-foreground: oklch(0.99 0.02 27);
-  --check-out-soft: oklch(0.95 0.05 27);
+  --check-in: oklch(0.55 0.13 158);
+  --check-in-foreground: oklch(0.99 0.02 158);
+  --check-in-soft: oklch(0.95 0.04 158);
+  --check-out: oklch(0.56 0.18 25);
+  --check-out-foreground: oklch(0.99 0.02 25);
+  --check-out-soft: oklch(0.955 0.035 25);
 }
 
 .dark {
