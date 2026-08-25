@@ -115,7 +115,7 @@ function CheckInComponent() {
     );
 
     try {
-      await runCheckAction({ data: { childId: child.id, actionType } });
+      await recordCheckAction({ data: { childId: child.id, actionType } });
       toast.success(`${child.child_name} ${actionType.toLowerCase()}`, {
         description: "Status synced and Make.com notified.",
       });
