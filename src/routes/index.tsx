@@ -320,5 +320,3 @@ function ActionButton({
   );
 }
 
-// useQuery imported here to avoid a top-level import-only line; co-located for clarity.
-import { useQuery } from "@tanstack/react-query";
