@@ -52,7 +52,6 @@ const childrenQueryOptions = () =>
 
 function CheckInComponent() {
   const qc = useQueryClient();
-  const runCheckAction = useServerFn(recordCheckAction);
   const [search, setSearch] = useState("");
   const [pendingId, setPendingId] = useState<string | null>(null);
 
