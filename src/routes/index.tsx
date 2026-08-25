@@ -5,28 +5,50 @@ import {
   queryOptions,
 } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { Search, LogIn, LogOut, MessageCircle, Users, Loader2, Check } from "lucide-react";
+import {
+  Search,
+  LogIn,
+  LogOut,
+  MessageCircle,
+  Users,
+  Loader2,
+  Check,
+  UserPlus,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { recordCheckAction } from "@/lib/checkin.functions";
+import { addChild } from "@/lib/children.functions";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type Child = Database["public"]["Tables"]["children"]["Row"];
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Kids Ministry Check-In" },
+      { title: "GloryGate Connect — Kids Ministry Check-In" },
       {
         name: "description",
         content:
-          "Mobile-friendly check-in and check-out for church kids ministry ushers.",
+          "GloryGate Connect: mobile check-in and check-out for Jesus Christ Hope of Glory Ministries kids ministry ushers.",
       },
-      { property: "og:title", content: "Kids Ministry Check-In" },
+      { property: "og:title", content: "GloryGate Connect" },
       {
         property: "og:description",
-        content: "Check in and check out children for church kids ministry.",
+        content:
+          "Check in and check out children at Jesus Christ Hope of Glory Ministries.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
