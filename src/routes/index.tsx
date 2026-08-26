@@ -165,7 +165,7 @@ function CheckInComponent() {
             </div>
             <div className="min-w-0 flex-1">
               <h1 className="truncate text-lg font-bold leading-tight tracking-tight">
-                GloryGate <span className="text-accent-foreground">Connect</span>
+                GloryGate <span className="text-accent">Connect</span>
               </h1>
               <p className="truncate text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                 Jesus Christ Hope of Glory Ministries
