@@ -20,18 +20,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { recordCheckAction } from "@/lib/checkin.functions";
-import { addChild } from "@/lib/children.functions";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { AddChildDialog } from "@/components/AddChildDialog";
 
 type Child = Database["public"]["Tables"]["children"]["Row"];

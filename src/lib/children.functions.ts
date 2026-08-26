@@ -5,7 +5,7 @@ import { z } from "zod";
  * Adds a new child (and their parent details) to the roster.
  * Writes go through the service role because the kiosk is unauthenticated.
  */
-const addChild = createServerFn({ method: "POST" })
+export const addChild = createServerFn({ method: "POST" })
   .inputValidator((data) =>
     z
       .object({
@@ -38,4 +38,3 @@ const addChild = createServerFn({ method: "POST" })
     return child;
   });
 
-export { addChild };
