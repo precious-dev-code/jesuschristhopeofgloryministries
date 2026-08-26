@@ -76,6 +76,7 @@ function CheckInComponent() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
 
   const { data: children } = useQuery(childrenQueryOptions());
 
