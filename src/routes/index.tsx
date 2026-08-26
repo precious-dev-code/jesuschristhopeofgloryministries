@@ -202,7 +202,11 @@ function CheckInComponent() {
       <AddChildDialog open={addOpen} onOpenChange={setAddOpen} />
 
       <main className="mx-auto max-w-xl px-4 py-4 pb-16">
-        {filtered.length === 0 ? (
+        {!hydrated ? (
+          <div className="mt-16 text-center text-muted-foreground">
+            <Loader2 className="mx-auto h-6 w-6 animate-spin opacity-60" />
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="mt-16 text-center text-muted-foreground">
             <Users className="mx-auto h-10 w-10 opacity-40" />
             <p className="mt-3 text-sm">
@@ -210,6 +214,7 @@ function CheckInComponent() {
             </p>
           </div>
         ) : (
+
           <ul className="space-y-3">
             {filtered.map((child) => (
               <ChildCard
