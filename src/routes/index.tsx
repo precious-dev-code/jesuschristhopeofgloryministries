@@ -66,6 +66,7 @@ const childrenQueryOptions = () =>
 function CheckInComponent() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
+  const [lessonTopic, setLessonTopic] = useState("");
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
@@ -135,7 +136,7 @@ function CheckInComponent() {
     );
 
     try {
-      await recordCheckAction({ data: { childId: child.id, actionType } });
+      await recordCheckAction({ data: { childId: child.id, actionType, lessonTopic } });
       toast.success(`${child.child_name} ${actionType.toLowerCase()}`, {
         description: "Status synced and Make.com notified.",
       });
@@ -194,6 +195,23 @@ function CheckInComponent() {
               <span className="hidden sm:inline">Add New Child</span>
               <span className="sr-only sm:hidden">Add New Child</span>
             </Button>
+          </div>
+
+          <div className="mt-3">
+            <label
+              htmlFor="lesson-topic"
+              className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
+            >
+              Today&apos;s Bible Lesson Topic
+            </label>
+            <input
+              id="lesson-topic"
+              type="text"
+              value={lessonTopic}
+              onChange={(e) => setLessonTopic(e.target.value)}
+              placeholder="e.g. The Good Samaritan"
+              className="mt-1 h-11 w-full rounded-xl border border-border bg-input px-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            />
           </div>
 
           <p
