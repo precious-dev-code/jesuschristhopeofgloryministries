@@ -20,6 +20,7 @@ const recordCheckAction = createServerFn({ method: "POST" })
       .object({
         childId: z.string().uuid(),
         actionType: z.enum(["Check In", "Check Out"]),
+        lessonTopic: z.string().optional(),
       })
       .parse(data),
   )
@@ -69,14 +70,18 @@ const recordCheckAction = createServerFn({ method: "POST" })
       process.env["MAKE_WEBHOOK_URL"] ??
       "https://hook.eu1.make.com/e6wgowgxjcqbwujwuuep2hqbkrslsxfo";
 
+    const lessonTopic = data.lessonTopic?.trim() ? data.lessonTopic.trim() : "God's Love";
+
     const payload = {
       childId: child.id,
       childName: child.child_name,
       parentName: child.parent_name,
       parentPhone: child.parent_phone,
       actionType: data.actionType,
+      lessonTopic,
       timestamp,
     };
+
 
     try {
       const res = await fetch(webhookUrl, {
