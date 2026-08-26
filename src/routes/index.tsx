@@ -68,6 +68,12 @@ function CheckInComponent() {
   const [search, setSearch] = useState("");
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
 
   const { data: children } = useQuery(childrenQueryOptions());
 
