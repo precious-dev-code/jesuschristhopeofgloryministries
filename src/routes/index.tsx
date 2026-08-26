@@ -66,6 +66,7 @@ const childrenQueryOptions = () =>
 function CheckInComponent() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
+  const [lessonTopic, setLessonTopic] = useState("");
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
@@ -135,7 +136,7 @@ function CheckInComponent() {
     );
 
     try {
-      await recordCheckAction({ data: { childId: child.id, actionType } });
+      await recordCheckAction({ data: { childId: child.id, actionType, lessonTopic } });
       toast.success(`${child.child_name} ${actionType.toLowerCase()}`, {
         description: "Status synced and Make.com notified.",
       });
