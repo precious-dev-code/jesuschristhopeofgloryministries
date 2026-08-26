@@ -197,6 +197,23 @@ function CheckInComponent() {
             </Button>
           </div>
 
+          <div className="mt-3">
+            <label
+              htmlFor="lesson-topic"
+              className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
+            >
+              Today&apos;s Bible Lesson Topic
+            </label>
+            <input
+              id="lesson-topic"
+              type="text"
+              value={lessonTopic}
+              onChange={(e) => setLessonTopic(e.target.value)}
+              placeholder="e.g. The Good Samaritan"
+              className="mt-1 h-11 w-full rounded-xl border border-border bg-input px-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
+
           <p
             suppressHydrationWarning
             className="mt-2 text-xs text-muted-foreground"
