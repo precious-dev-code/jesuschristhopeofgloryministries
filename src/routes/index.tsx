@@ -23,6 +23,7 @@ import { recordCheckAction } from "@/lib/checkin.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AddChildDialog } from "@/components/AddChildDialog";
+import { AppNav } from "@/components/AppNav";
 
 type Child = Database["public"]["Tables"]["children"]["Row"];
 
@@ -173,6 +174,8 @@ function CheckInComponent() {
               </p>
             </div>
           </div>
+
+          <AppNav />
 
           <div className="mt-3 flex items-center gap-2">
             <div className="relative flex-1">
