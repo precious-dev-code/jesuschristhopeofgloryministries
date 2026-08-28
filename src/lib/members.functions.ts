@@ -15,7 +15,7 @@ export const addMember = createServerFn({ method: "POST" })
     z
       .object({
         memberName: z.string().trim().min(2).max(120),
-        phone: z.string().trim().min(6).max(30),
+        phone: z.string().trim().max(30).optional(),
       })
       .parse(data),
   )
@@ -28,7 +28,7 @@ export const addMember = createServerFn({ method: "POST" })
       .from("members")
       .insert({
         member_name: data.memberName,
-        phone: data.phone,
+        phone: data.phone || null,
         status: "unmarked",
       })
       .select("*")
@@ -47,7 +47,7 @@ export const updateMember = createServerFn({ method: "POST" })
       .object({
         memberId: z.string().uuid(),
         memberName: z.string().trim().min(2).max(120),
-        phone: z.string().trim().min(6).max(30),
+        phone: z.string().trim().max(30).optional(),
       })
       .parse(data),
   )
@@ -58,7 +58,7 @@ export const updateMember = createServerFn({ method: "POST" })
 
     const { data: member, error } = await supabaseAdmin
       .from("members")
-      .update({ member_name: data.memberName, phone: data.phone })
+      .update({ member_name: data.memberName, phone: data.phone || null })
       .eq("id", data.memberId)
       .select("*")
       .single();

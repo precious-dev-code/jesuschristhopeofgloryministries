@@ -18,7 +18,7 @@ import { addMember, updateMember } from "@/lib/members.functions";
 export type EditableMember = {
   id: string;
   member_name: string;
-  phone: string;
+  phone: string | null;
 };
 
 export function AddMemberDialog({
