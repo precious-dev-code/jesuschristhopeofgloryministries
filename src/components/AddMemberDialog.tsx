@@ -41,6 +41,7 @@ export function AddMemberDialog({
     if (!open) return;
     setMemberName(member?.member_name ?? "");
     setPhone(member?.phone ?? "");
+    // phone is optional; empty stays empty
   }, [open, member]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -51,14 +52,15 @@ export function AddMemberDialog({
       toast.error("Please enter the member's full name.");
       return;
     }
-    if (phone.trim().replace(/[^0-9]/g, "").length < 6) {
-      toast.error("Please enter a valid phone number.");
+    const trimmedPhone = phone.trim();
+    if (trimmedPhone && trimmedPhone.replace(/[^0-9]/g, "").length < 6) {
+      toast.error("Please enter a valid phone number, or leave it empty.");
       return;
     }
 
     setSaving(true);
     try {
-      const payload = { memberName: memberName.trim(), phone: phone.trim() };
+      const payload = { memberName: memberName.trim(), phone: trimmedPhone };
 
       if (member) {
         await updateMember({ data: { memberId: member.id, ...payload } });
