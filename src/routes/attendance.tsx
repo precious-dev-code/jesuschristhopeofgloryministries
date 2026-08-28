@@ -84,6 +84,9 @@ function AttendanceComponent() {
   const [search, setSearch] = useState("");
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+  const [editMember, setEditMember] = useState<EditableMember | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Member | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
