@@ -307,10 +307,14 @@ function MemberCard({
   member,
   pending,
   onMark,
+  onEdit,
+  onDelete,
 }: {
   member: Member;
   pending: boolean;
   onMark: (member: Member, status: "Present" | "Absent") => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }) {
   const present = member.status === "Present";
   const absent = member.status === "Absent";
