@@ -41,7 +41,6 @@ export function AddMemberDialog({
     if (!open) return;
     setMemberName(member?.member_name ?? "");
     setPhone(member?.phone ?? "");
-    // phone is optional; empty stays empty
   }, [open, member]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -106,7 +105,7 @@ export function AddMemberDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="member-phone">Phone number</Label>
+            <Label htmlFor="member-phone">Phone number (optional)</Label>
             <Input
               id="member-phone"
               type="tel"
