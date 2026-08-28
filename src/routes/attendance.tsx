@@ -162,6 +162,23 @@ function AttendanceComponent() {
     }
   }
 
+  async function handleDelete() {
+    if (!deleteTarget || deleting) return;
+    setDeleting(true);
+    try {
+      await deleteMember({ data: { memberId: deleteTarget.id } });
+      await qc.invalidateQueries({ queryKey: ["members"] });
+      toast.success(`${deleteTarget.member_name} removed`);
+      setDeleteTarget(null);
+    } catch (err) {
+      toast.error(`Could not remove ${deleteTarget.member_name}`, {
+        description: err instanceof Error ? err.message : "Please try again.",
+      });
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-10 border-b border-border bg-card/90 backdrop-blur supports-[backdrop-filter]:bg-card/70">
