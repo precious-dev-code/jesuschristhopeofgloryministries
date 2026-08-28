@@ -232,6 +232,43 @@ function AttendanceComponent() {
       </header>
 
       <AddMemberDialog open={addOpen} onOpenChange={setAddOpen} />
+      <AddMemberDialog
+        open={editMember !== null}
+        onOpenChange={(open) => {
+          if (!open) setEditMember(null);
+        }}
+        member={editMember}
+      />
+
+      <AlertDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !deleting) setDeleteTarget(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove {deleteTarget?.member_name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes the member from the attendance list.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <main className="mx-auto max-w-xl px-4 py-4 pb-16">
         {!hydrated ? (
@@ -255,6 +292,8 @@ function AttendanceComponent() {
                 member={member}
                 pending={pendingId === member.id}
                 onMark={handleMark}
+                onEdit={() => setEditMember(member)}
+                onDelete={() => setDeleteTarget(member)}
               />
             ))}
           </ul>
