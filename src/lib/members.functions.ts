@@ -41,6 +41,56 @@ export const addMember = createServerFn({ method: "POST" })
     return member;
   });
 
+export const updateMember = createServerFn({ method: "POST" })
+  .inputValidator((data) =>
+    z
+      .object({
+        memberId: z.string().uuid(),
+        memberName: z.string().trim().min(2).max(120),
+        phone: z.string().trim().min(6).max(30),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+
+    const { data: member, error } = await supabaseAdmin
+      .from("members")
+      .update({ member_name: data.memberName, phone: data.phone })
+      .eq("id", data.memberId)
+      .select("*")
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update member: ${error.message}`);
+    }
+
+    return member;
+  });
+
+export const deleteMember = createServerFn({ method: "POST" })
+  .inputValidator((data) =>
+    z.object({ memberId: z.string().uuid() }).parse(data),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+
+    const { error } = await supabaseAdmin
+      .from("members")
+      .delete()
+      .eq("id", data.memberId);
+
+    if (error) {
+      throw new Error(`Failed to remove member: ${error.message}`);
+    }
+
+    return { ok: true, memberId: data.memberId };
+  });
+
 export const markAttendance = createServerFn({ method: "POST" })
   .inputValidator((data) =>
     z

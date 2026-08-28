@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -13,24 +13,35 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { addMember } from "@/lib/members.functions";
+import { addMember, updateMember } from "@/lib/members.functions";
+
+export type EditableMember = {
+  id: string;
+  member_name: string;
+  phone: string;
+};
 
 export function AddMemberDialog({
   open,
   onOpenChange,
+  member = null,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** When provided, the dialog edits this member instead of creating a new one. */
+  member?: EditableMember | null;
 }) {
   const qc = useQueryClient();
   const [memberName, setMemberName] = useState("");
   const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
+  const isEdit = Boolean(member);
 
-  function reset() {
-    setMemberName("");
-    setPhone("");
-  }
+  useEffect(() => {
+    if (!open) return;
+    setMemberName(member?.member_name ?? "");
+    setPhone(member?.phone ?? "");
+  }, [open, member]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,15 +58,20 @@ export function AddMemberDialog({
 
     setSaving(true);
     try {
-      await addMember({
-        data: { memberName: memberName.trim(), phone: phone.trim() },
-      });
+      const payload = { memberName: memberName.trim(), phone: phone.trim() };
+
+      if (member) {
+        await updateMember({ data: { memberId: member.id, ...payload } });
+        toast.success(`${payload.memberName} updated`);
+      } else {
+        await addMember({ data: payload });
+        toast.success(`${payload.memberName} added to the member list`);
+      }
+
       await qc.invalidateQueries({ queryKey: ["members"] });
-      toast.success(`${memberName.trim()} added to the member list`);
-      reset();
       onOpenChange(false);
     } catch (err) {
-      toast.error("Could not add member", {
+      toast.error(isEdit ? "Could not update member" : "Could not add member", {
         description: err instanceof Error ? err.message : "Please try again.",
       });
     } finally {
@@ -67,9 +83,11 @@ export function AddMemberDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add New Member</DialogTitle>
+          <DialogTitle>{isEdit ? "Edit Member" : "Add New Member"}</DialogTitle>
           <DialogDescription>
-            Register a member and their phone number for attendance.
+            {isEdit
+              ? "Correct the member's details."
+              : "Register a member and their phone number for attendance."}
           </DialogDescription>
         </DialogHeader>
 
@@ -111,7 +129,7 @@ export function AddMemberDialog({
             </Button>
             <Button type="submit" className="h-11 font-semibold" disabled={saving}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              Save member
+              {isEdit ? "Save changes" : "Save member"}
             </Button>
           </DialogFooter>
         </form>

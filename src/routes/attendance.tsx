@@ -13,13 +13,25 @@ import {
   Loader2,
   UserPlus,
   Phone,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
-import { markAttendance } from "@/lib/members.functions";
+import { markAttendance, deleteMember } from "@/lib/members.functions";
 import { Button } from "@/components/ui/button";
-import { AddMemberDialog } from "@/components/AddMemberDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { AddMemberDialog, type EditableMember } from "@/components/AddMemberDialog";
 import { AppNav } from "@/components/AppNav";
 
 type Member = {
@@ -72,6 +84,9 @@ function AttendanceComponent() {
   const [search, setSearch] = useState("");
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+  const [editMember, setEditMember] = useState<EditableMember | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Member | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -147,6 +162,23 @@ function AttendanceComponent() {
     }
   }
 
+  async function handleDelete() {
+    if (!deleteTarget || deleting) return;
+    setDeleting(true);
+    try {
+      await deleteMember({ data: { memberId: deleteTarget.id } });
+      await qc.invalidateQueries({ queryKey: ["members"] });
+      toast.success(`${deleteTarget.member_name} removed`);
+      setDeleteTarget(null);
+    } catch (err) {
+      toast.error(`Could not remove ${deleteTarget.member_name}`, {
+        description: err instanceof Error ? err.message : "Please try again.",
+      });
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-10 border-b border-border bg-card/90 backdrop-blur supports-[backdrop-filter]:bg-card/70">
@@ -200,6 +232,43 @@ function AttendanceComponent() {
       </header>
 
       <AddMemberDialog open={addOpen} onOpenChange={setAddOpen} />
+      <AddMemberDialog
+        open={editMember !== null}
+        onOpenChange={(open) => {
+          if (!open) setEditMember(null);
+        }}
+        member={editMember}
+      />
+
+      <AlertDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !deleting) setDeleteTarget(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove {deleteTarget?.member_name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes the member from the attendance list.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <main className="mx-auto max-w-xl px-4 py-4 pb-16">
         {!hydrated ? (
@@ -223,6 +292,8 @@ function AttendanceComponent() {
                 member={member}
                 pending={pendingId === member.id}
                 onMark={handleMark}
+                onEdit={() => setEditMember(member)}
+                onDelete={() => setDeleteTarget(member)}
               />
             ))}
           </ul>
@@ -236,10 +307,14 @@ function MemberCard({
   member,
   pending,
   onMark,
+  onEdit,
+  onDelete,
 }: {
   member: Member;
   pending: boolean;
   onMark: (member: Member, status: "Present" | "Absent") => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }) {
   const present = member.status === "Present";
   const absent = member.status === "Absent";
@@ -268,6 +343,24 @@ function MemberCard({
             <Phone className="h-3.5 w-3.5" />
             {member.phone}
           </p>
+        </div>
+        <div className="flex shrink-0 gap-1">
+          <button
+            type="button"
+            onClick={onEdit}
+            aria-label={`Edit ${member.member_name}`}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            aria-label={`Remove ${member.member_name}`}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-check-out-soft hover:text-check-out"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
