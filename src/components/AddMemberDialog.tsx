@@ -18,7 +18,7 @@ import { addMember, updateMember } from "@/lib/members.functions";
 export type EditableMember = {
   id: string;
   member_name: string;
-  phone: string;
+  phone: string | null;
 };
 
 export function AddMemberDialog({
@@ -51,14 +51,15 @@ export function AddMemberDialog({
       toast.error("Please enter the member's full name.");
       return;
     }
-    if (phone.trim().replace(/[^0-9]/g, "").length < 6) {
-      toast.error("Please enter a valid phone number.");
+    const trimmedPhone = phone.trim();
+    if (trimmedPhone && trimmedPhone.replace(/[^0-9]/g, "").length < 6) {
+      toast.error("Please enter a valid phone number, or leave it empty.");
       return;
     }
 
     setSaving(true);
     try {
-      const payload = { memberName: memberName.trim(), phone: phone.trim() };
+      const payload = { memberName: memberName.trim(), phone: trimmedPhone };
 
       if (member) {
         await updateMember({ data: { memberId: member.id, ...payload } });
@@ -104,7 +105,7 @@ export function AddMemberDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="member-phone">Phone number</Label>
+            <Label htmlFor="member-phone">Phone number (optional)</Label>
             <Input
               id="member-phone"
               type="tel"
