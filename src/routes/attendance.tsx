@@ -13,13 +13,25 @@ import {
   Loader2,
   UserPlus,
   Phone,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
-import { markAttendance } from "@/lib/members.functions";
+import { markAttendance, deleteMember } from "@/lib/members.functions";
 import { Button } from "@/components/ui/button";
-import { AddMemberDialog } from "@/components/AddMemberDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { AddMemberDialog, type EditableMember } from "@/components/AddMemberDialog";
 import { AppNav } from "@/components/AppNav";
 
 type Member = {
