@@ -339,10 +339,12 @@ function MemberCard({
               </span>
             ) : null}
           </div>
-          <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-            <Phone className="h-3.5 w-3.5" />
-            {member.phone}
-          </p>
+          {member.phone ? (
+            <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Phone className="h-3.5 w-3.5" />
+              {member.phone}
+            </p>
+          ) : null}
         </div>
         <div className="flex shrink-0 gap-1">
           <button

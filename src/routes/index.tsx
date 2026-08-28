@@ -14,15 +14,28 @@ import {
   Loader2,
   Check,
   UserPlus,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { recordCheckAction } from "@/lib/checkin.functions";
+import { deleteChild } from "@/lib/children.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AddChildDialog } from "@/components/AddChildDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { AddChildDialog, type EditableChild } from "@/components/AddChildDialog";
 import { AppNav } from "@/components/AppNav";
 
 type Child = Database["public"]["Tables"]["children"]["Row"];
