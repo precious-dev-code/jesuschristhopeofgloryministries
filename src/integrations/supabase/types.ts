@@ -79,7 +79,7 @@ export type Database = {
           id: string
           last_marked_at: string | null
           member_name: string
-          phone: string
+          phone: string | null
           status: string
         }
         Insert: {
@@ -87,7 +87,7 @@ export type Database = {
           id?: string
           last_marked_at?: string | null
           member_name: string
-          phone: string
+          phone?: string | null
           status?: string
         }
         Update: {
@@ -95,7 +95,7 @@ export type Database = {
           id?: string
           last_marked_at?: string | null
           member_name?: string
-          phone?: string
+          phone?: string | null
           status?: string
         }
         Relationships: []
