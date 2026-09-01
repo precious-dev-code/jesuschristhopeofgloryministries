@@ -15,7 +15,9 @@ import {
   Phone,
   Pencil,
   Trash2,
+  Lock,
 } from "lucide-react";
+
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +43,19 @@ type Member = {
   status: string;
   last_marked_at: string | null;
 };
+
+/** True when the timestamp falls on the usher's current local calendar day. */
+function isToday(ts: string | null) {
+  if (!ts) return false;
+  const d = new Date(ts);
+  const now = new Date();
+  return (
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate()
+  );
+}
+
 
 export const Route = createFileRoute("/attendance")({
   head: () => ({
@@ -130,7 +145,9 @@ function AttendanceComponent() {
   }, [members]);
 
   async function handleMark(member: Member, status: "Present" | "Absent") {
-    if (member.status === status) return;
+    // Locked for the rest of the day once attendance was recorded today.
+    if (isToday(member.last_marked_at)) return;
+
 
     setPendingId(member.id);
     // Optimistic update.
@@ -318,6 +335,8 @@ function MemberCard({
 }) {
   const present = member.status === "Present";
   const absent = member.status === "Absent";
+  const locked = isToday(member.last_marked_at);
+
 
   return (
     <li className="rounded-2xl border border-border bg-card p-4 shadow-sm">
@@ -373,6 +392,7 @@ function MemberCard({
           idleLabel="Present"
           tone="in"
           pending={pending}
+          locked={locked}
           onClick={() => onMark(member, "Present")}
         />
         <AttendanceButton
@@ -381,12 +401,20 @@ function MemberCard({
           idleLabel="Absent"
           tone="out"
           pending={pending}
+          locked={locked}
           onClick={() => onMark(member, "Absent")}
         />
       </div>
+      {locked ? (
+        <p className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <Lock className="h-3 w-3" />
+          Attendance already recorded today. Unlocks tomorrow.
+        </p>
+      ) : null}
     </li>
   );
 }
+
 
 function AttendanceButton({
   active,
@@ -394,6 +422,7 @@ function AttendanceButton({
   idleLabel,
   tone,
   pending,
+  locked,
   onClick,
 }: {
   active: boolean;
@@ -401,6 +430,7 @@ function AttendanceButton({
   idleLabel: string;
   tone: "in" | "out";
   pending: boolean;
+  locked: boolean;
   onClick: () => void;
 }) {
   const solid =
@@ -415,14 +445,16 @@ function AttendanceButton({
   return (
     <button
       type="button"
-      disabled={pending}
+      disabled={pending || locked}
       onClick={onClick}
-      className={`flex h-11 items-center justify-center gap-1.5 rounded-xl text-sm font-semibold transition-colors active:scale-[0.98] disabled:opacity-60 ${
+      className={`flex h-11 items-center justify-center gap-1.5 rounded-xl text-sm font-semibold transition-colors active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 ${
         active ? solid : outline
       }`}
     >
       {pending ? (
         <Loader2 className="h-4 w-4 animate-spin" />
+      ) : locked ? (
+        <Lock className="h-4 w-4" />
       ) : active ? (
         <Check className="h-4 w-4" />
       ) : tone === "in" ? (
@@ -434,3 +466,4 @@ function AttendanceButton({
     </button>
   );
 }
+
