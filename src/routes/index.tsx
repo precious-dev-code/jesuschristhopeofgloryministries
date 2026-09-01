@@ -16,6 +16,7 @@ import {
   UserPlus,
   Pencil,
   Trash2,
+  Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,7 +25,6 @@ import type { Database } from "@/integrations/supabase/types";
 import { recordCheckAction } from "@/lib/checkin.functions";
 import { deleteChild } from "@/lib/children.functions";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -77,20 +77,48 @@ const childrenQueryOptions = () =>
     },
   });
 
+/** Start of today in the usher's local timezone, as an ISO timestamp. */
+function startOfTodayISO() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+}
+
+/** Which actions each child already had recorded today ("Check In" / "Check Out"). */
+const todayLogsQueryOptions = () =>
+  queryOptions({
+    queryKey: ["check-in-logs", "today"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("check_in_logs")
+        .select("child_id, action_type")
+        .gte("created_at", startOfTodayISO());
+      if (error) throw error;
+      return (data ?? []).map((r) => `${r.child_id}|${r.action_type}`);
+    },
+  });
+
 function CheckInComponent() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [lessonTopic, setLessonTopic] = useState("");
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+  const [editChild, setEditChild] = useState<EditableChild | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Child | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     setHydrated(true);
   }, []);
 
-
   const { data: children } = useQuery(childrenQueryOptions());
+  const { data: todayKeys } = useQuery({
+    ...todayLogsQueryOptions(),
+    enabled: hydrated,
+  });
+
+  const doneToday = useMemo(() => new Set(todayKeys ?? []), [todayKeys]);
 
   // Live updates across usher devices via Supabase Realtime.
   useEffect(() => {
@@ -105,6 +133,13 @@ function CheckInComponent() {
               c.id === (payload.new as Child).id ? (payload.new as Child) : c,
             ),
           );
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "check_in_logs" },
+        () => {
+          qc.invalidateQueries({ queryKey: ["check-in-logs", "today"] });
         },
       )
       .subscribe();
@@ -131,11 +166,8 @@ function CheckInComponent() {
   }, [children]);
 
   async function handleAction(child: Child, actionType: "Check In" | "Check Out") {
-    // No-op if already in that state.
-    const already =
-      (actionType === "Check In" && child.status === "checked_in") ||
-      (actionType === "Check Out" && child.status === "checked_out");
-    if (already) return;
+    // Locked for the rest of the day once this action was recorded today.
+    if (doneToday.has(`${child.id}|${actionType}`)) return;
 
     setPendingId(child.id);
     // Optimistic update so the button reflects status immediately.
@@ -148,24 +180,50 @@ function CheckInComponent() {
           : c,
       ),
     );
+    qc.setQueryData<string[]>(["check-in-logs", "today"], (prev) => [
+      ...(prev ?? []),
+      `${child.id}|${actionType}`,
+    ]);
 
     try {
       await recordCheckAction({ data: { childId: child.id, actionType, lessonTopic } });
       toast.success(`${child.child_name} ${actionType.toLowerCase()}`, {
         description: "Status synced and Make.com notified.",
       });
+      qc.invalidateQueries({ queryKey: ["check-in-logs", "today"] });
     } catch (err) {
-      // Revert optimistic update on failure.
+      // Revert optimistic updates on failure.
       qc.setQueryData<Child[]>(["children"], (prev) =>
         (prev ?? []).map((c) =>
           c.id === child.id ? { ...c, status: child.status } : c,
         ),
+      );
+      qc.setQueryData<string[]>(["check-in-logs", "today"], (prev) =>
+        (prev ?? []).filter((k) => k !== `${child.id}|${actionType}`),
       );
       toast.error(`Could not ${actionType.toLowerCase()} ${child.child_name}`, {
         description: err instanceof Error ? err.message : "Please try again.",
       });
     } finally {
       setPendingId(null);
+    }
+  }
+
+  async function handleDelete() {
+    if (!deleteTarget || deleting) return;
+    setDeleting(true);
+    try {
+      await deleteChild({ data: { childId: deleteTarget.id } });
+      await qc.invalidateQueries({ queryKey: ["children"] });
+      await qc.invalidateQueries({ queryKey: ["check-in-logs", "today"] });
+      toast.success(`${deleteTarget.child_name} removed`);
+      setDeleteTarget(null);
+    } catch (err) {
+      toast.error(`Could not remove ${deleteTarget.child_name}`, {
+        description: err instanceof Error ? err.message : "Please try again.",
+      });
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -240,6 +298,43 @@ function CheckInComponent() {
       </header>
 
       <AddChildDialog open={addOpen} onOpenChange={setAddOpen} />
+      <AddChildDialog
+        open={editChild !== null}
+        onOpenChange={(open) => {
+          if (!open) setEditChild(null);
+        }}
+        child={editChild}
+      />
+
+      <AlertDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !deleting) setDeleteTarget(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove {deleteTarget?.child_name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes the child and their check-in history.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <main className="mx-auto max-w-xl px-4 py-4 pb-16">
         {!hydrated ? (
@@ -250,7 +345,9 @@ function CheckInComponent() {
           <div className="mt-16 text-center text-muted-foreground">
             <Users className="mx-auto h-10 w-10 opacity-40" />
             <p className="mt-3 text-sm">
-              {search ? "No children match your search." : "No children found."}
+              {search
+                ? "No children match your search."
+                : "No children yet. Tap \"Add New Child\" to register one."}
             </p>
           </div>
         ) : (
@@ -261,7 +358,11 @@ function CheckInComponent() {
                 key={child.id}
                 child={child}
                 pending={pendingId === child.id}
+                lockedIn={doneToday.has(`${child.id}|Check In`)}
+                lockedOut={doneToday.has(`${child.id}|Check Out`)}
                 onAction={handleAction}
+                onEdit={() => setEditChild(child)}
+                onDelete={() => setDeleteTarget(child)}
               />
             ))}
           </ul>
@@ -274,11 +375,19 @@ function CheckInComponent() {
 function ChildCard({
   child,
   pending,
+  lockedIn,
+  lockedOut,
   onAction,
+  onEdit,
+  onDelete,
 }: {
   child: Child;
   pending: boolean;
+  lockedIn: boolean;
+  lockedOut: boolean;
   onAction: (child: Child, actionType: "Check In" | "Check Out") => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }) {
   const checkedIn = child.status === "checked_in";
   const phoneDigits = child.parent_phone.replace(/[^0-9]/g, "");
@@ -309,6 +418,24 @@ function ChildCard({
             <p className="mt-1 text-sm text-muted-foreground">{child.parent_phone}</p>
           )}
         </div>
+        <div className="flex shrink-0 gap-1">
+          <button
+            type="button"
+            onClick={onEdit}
+            aria-label={`Edit ${child.child_name}`}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            aria-label={`Remove ${child.child_name}`}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-check-out-soft hover:text-check-out"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
@@ -318,6 +445,7 @@ function ChildCard({
           idleLabel="Check In"
           tone="in"
           pending={pending}
+          locked={lockedIn}
           onClick={() => onAction(child, "Check In")}
         />
         <ActionButton
@@ -326,9 +454,21 @@ function ChildCard({
           idleLabel="Check Out"
           tone="out"
           pending={pending}
+          locked={lockedOut}
           onClick={() => onAction(child, "Check Out")}
         />
       </div>
+      {lockedIn || lockedOut ? (
+        <p className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <Lock className="h-3 w-3" />
+          {lockedIn && lockedOut
+            ? "Check in and check out already recorded today."
+            : lockedIn
+              ? "Check in already recorded today."
+              : "Check out already recorded today."}{" "}
+          Unlocks tomorrow.
+        </p>
+      ) : null}
     </li>
   );
 }
@@ -356,6 +496,7 @@ function ActionButton({
   idleLabel,
   tone,
   pending,
+  locked,
   onClick,
 }: {
   active: boolean;
@@ -363,6 +504,7 @@ function ActionButton({
   idleLabel: string;
   tone: "in" | "out";
   pending: boolean;
+  locked: boolean;
   onClick: () => void;
 }) {
   const solid =
@@ -377,14 +519,16 @@ function ActionButton({
   return (
     <button
       type="button"
-      disabled={pending}
+      disabled={pending || locked}
       onClick={onClick}
-      className={`flex h-11 items-center justify-center gap-1.5 rounded-xl text-sm font-semibold transition-colors active:scale-[0.98] disabled:opacity-60 ${
+      className={`flex h-11 items-center justify-center gap-1.5 rounded-xl text-sm font-semibold transition-colors active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 ${
         active ? solid : outline
       }`}
     >
       {pending ? (
         <Loader2 className="h-4 w-4 animate-spin" />
+      ) : locked ? (
+        <Lock className="h-4 w-4" />
       ) : active ? (
         <Check className="h-4 w-4" />
       ) : tone === "in" ? (
