@@ -44,17 +44,23 @@ type Member = {
   last_marked_at: string | null;
 };
 
-/** True when the timestamp falls on the usher's current local calendar day. */
-function isToday(ts: string | null) {
-  if (!ts) return false;
-  const d = new Date(ts);
-  const now = new Date();
-  return (
-    d.getFullYear() === now.getFullYear() &&
-    d.getMonth() === now.getMonth() &&
-    d.getDate() === now.getDate()
-  );
+type AttendanceRecord = {
+  id: string;
+  member_id: string | null;
+  member_name: string;
+  phone: string | null;
+  attendance_date: string;
+  status: string;
+  marked_at: string;
+};
+
+/** Local calendar day as YYYY-MM-DD. */
+function localDay(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate(),
+  ).padStart(2, "0")}`;
 }
+
 
 
 export const Route = createFileRoute("/attendance")({
