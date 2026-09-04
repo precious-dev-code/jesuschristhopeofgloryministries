@@ -97,6 +97,11 @@ export const markAttendance = createServerFn({ method: "POST" })
       .object({
         memberId: z.string().uuid(),
         status: z.enum(["Present", "Absent"]),
+        // Local calendar day of the kiosk (YYYY-MM-DD); defaults to UTC today.
+        date: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/)
+          .optional(),
       })
       .parse(data),
   )
@@ -120,7 +125,7 @@ export const markAttendance = createServerFn({ method: "POST" })
     }
 
     const timestamp = new Date().toISOString();
-    const date = timestamp.slice(0, 10); // today's date, YYYY-MM-DD
+    const date = data.date ?? timestamp.slice(0, 10);
 
     // 2. Persist the member's current attendance status.
     const { error: updateError } = await supabaseAdmin
@@ -131,6 +136,28 @@ export const markAttendance = createServerFn({ method: "POST" })
     if (updateError) {
       throw new Error(`Failed to update attendance: ${updateError.message}`);
     }
+
+    // 2b. Write the permanent dated register entry (one per member per day).
+    const { error: recordError } = await supabaseAdmin
+      .from("attendance_records")
+      .upsert(
+        {
+          member_id: member.id,
+          member_name: member.member_name,
+          phone: member.phone,
+          attendance_date: date,
+          status: data.status,
+          marked_at: timestamp,
+        },
+        { onConflict: "member_id,attendance_date" },
+      );
+
+    if (recordError) {
+      throw new Error(
+        `Failed to save attendance record: ${recordError.message}`,
+      );
+    }
+
 
     // 3. Fire the Make.com webhook (same URL as the kids check-in).
     const webhookUrl =
