@@ -136,11 +136,16 @@ function AttendanceComponent() {
     );
   }, [members, search]);
 
-  const counts = useMemo(() => {
+const counts = useMemo(() => {
     const list = members ?? [];
     return {
-      present: list.filter((m) => m.status === "Present").length,
-      absent: list.filter((m) => m.status === "Absent").length,
+      presentToday: list.filter(
+        (m) => m.status === "Present" && isToday(m.last_marked_at),
+      ).length,
+      absentToday: list.filter(
+        (m) => m.status === "Absent" && isToday(m.last_marked_at),
+      ).length,
+      total: list.length,
     };
   }, [members]);
 
@@ -239,12 +244,6 @@ function AttendanceComponent() {
             </Button>
           </div>
 
-          <p
-            suppressHydrationWarning
-            className="mt-2 text-xs text-muted-foreground"
-          >
-            {counts.present} present · {counts.absent} absent
-          </p>
         </div>
       </header>
 
@@ -287,7 +286,13 @@ function AttendanceComponent() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <main className="mx-auto max-w-xl px-4 py-4 pb-16">
+<main className="mx-auto max-w-xl px-4 py-4 pb-16">
+        <AttendanceDashboard
+          presentToday={counts.presentToday}
+          absentToday={counts.absentToday}
+          total={counts.total}
+        />
+
         {!hydrated ? (
           <div className="mt-16 text-center text-muted-foreground">
             <Loader2 className="mx-auto h-6 w-6 animate-spin opacity-60" />
@@ -462,8 +467,70 @@ function AttendanceButton({
       ) : (
         <X className="h-4 w-4" />
       )}
-      {active ? activeLabel : idleLabel}
+{active ? activeLabel : idleLabel}
     </button>
+  );
+}
+
+function AttendanceDashboard({
+  presentToday,
+  absentToday,
+  total,
+}: {
+  presentToday: number;
+  absentToday: number;
+  total: number;
+}) {
+  const stats = [
+    {
+      label: "Present Today",
+      value: presentToday,
+      icon: Check,
+      chip: "bg-check-in-soft text-check-in",
+      valueClass: "text-check-in",
+    },
+    {
+      label: "Absent Today",
+      value: absentToday,
+      icon: X,
+      chip: "bg-check-out-soft text-check-out",
+      valueClass: "text-check-out",
+    },
+    {
+      label: "Total Members",
+      value: total,
+      icon: Users,
+      chip: "bg-primary/15 text-primary",
+      valueClass: "text-foreground",
+    },
+  ];
+
+  return (
+    <section aria-label="Attendance dashboard" className="mb-4">
+      <div className="grid grid-cols-3 gap-2">
+        {stats.map((stat) => (
+          <div
+            key={stat.label}
+            className="rounded-2xl border border-border bg-card p-3 shadow-sm"
+          >
+            <div
+              className={`inline-flex h-8 w-8 items-center justify-center rounded-xl ${stat.chip}`}
+            >
+              <stat.icon className="h-4 w-4" />
+            </div>
+            <p
+              suppressHydrationWarning
+              className={`mt-2 text-2xl font-bold leading-none tabular-nums ${stat.valueClass}`}
+            >
+              {stat.value}
+            </p>
+            <p className="mt-1 text-[11px] font-medium uppercase leading-tight tracking-wide text-muted-foreground">
+              {stat.label}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
