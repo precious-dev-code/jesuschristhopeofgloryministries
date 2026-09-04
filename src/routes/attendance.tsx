@@ -100,6 +100,20 @@ const membersQueryOptions = () =>
     },
   });
 
+const recordsQueryOptions = (day: string) =>
+  queryOptions({
+    queryKey: ["attendance_records", day],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("attendance_records")
+        .select("*")
+        .eq("attendance_date", day)
+        .order("marked_at", { ascending: false });
+      if (error) throw error;
+      return data as AttendanceRecord[];
+    },
+  });
+
 function AttendanceComponent() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
@@ -109,12 +123,18 @@ function AttendanceComponent() {
   const [deleteTarget, setDeleteTarget] = useState<Member | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [today, setToday] = useState(() => localDay());
+  const [selectedDay, setSelectedDay] = useState(() => localDay());
 
   useEffect(() => {
     setHydrated(true);
+    setToday(localDay());
+    setSelectedDay(localDay());
   }, []);
 
   const { data: members } = useQuery(membersQueryOptions());
+  const { data: selectedRecords } = useQuery(recordsQueryOptions(selectedDay));
+  const { data: todayRecords } = useQuery(recordsQueryOptions(today));
 
   // Live updates across devices.
   useEffect(() => {
@@ -125,6 +145,13 @@ function AttendanceComponent() {
         { event: "*", schema: "public", table: "members" },
         () => {
           qc.invalidateQueries({ queryKey: ["members"] });
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "attendance_records" },
+        () => {
+          qc.invalidateQueries({ queryKey: ["attendance_records"] });
         },
       )
       .subscribe();
@@ -142,23 +169,26 @@ function AttendanceComponent() {
     );
   }, [members, search]);
 
-const counts = useMemo(() => {
-    const list = members ?? [];
-    return {
-      presentToday: list.filter(
-        (m) => m.status === "Present" && isToday(m.last_marked_at),
-      ).length,
-      absentToday: list.filter(
-        (m) => m.status === "Absent" && isToday(m.last_marked_at),
-      ).length,
-      total: list.length,
-    };
-  }, [members]);
+  /** Members already recorded today -> their recorded status (drives the lock). */
+  const todayStatus = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const r of todayRecords ?? []) {
+      if (r.member_id) map.set(r.member_id, r.status);
+    }
+    return map;
+  }, [todayRecords]);
+
+  // Dashboard counts come from the dated register, not the member list.
+  const counts = useMemo(() => {
+    const list = selectedRecords ?? [];
+    const present = list.filter((r) => r.status === "Present").length;
+    const absent = list.filter((r) => r.status === "Absent").length;
+    return { present, absent, total: present + absent };
+  }, [selectedRecords]);
 
   async function handleMark(member: Member, status: "Present" | "Absent") {
     // Locked for the rest of the day once attendance was recorded today.
-    if (isToday(member.last_marked_at)) return;
-
+    if (todayStatus.has(member.id)) return;
 
     setPendingId(member.id);
     // Optimistic update.
@@ -171,9 +201,12 @@ const counts = useMemo(() => {
     );
 
     try {
-      await markAttendance({ data: { memberId: member.id, status } });
+      await markAttendance({
+        data: { memberId: member.id, status, date: today },
+      });
+      await qc.invalidateQueries({ queryKey: ["attendance_records"] });
       toast.success(`${member.member_name} marked ${status.toLowerCase()}`, {
-        description: "Make.com notified.",
+        description: "Saved to the attendance register.",
       });
     } catch (err) {
       // Revert on failure.
@@ -189,6 +222,7 @@ const counts = useMemo(() => {
       setPendingId(null);
     }
   }
+
 
   async function handleDelete() {
     if (!deleteTarget || deleting) return;
