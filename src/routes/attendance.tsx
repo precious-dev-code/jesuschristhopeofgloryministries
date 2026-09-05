@@ -328,10 +328,15 @@ function AttendanceComponent() {
 
 <main className="mx-auto max-w-xl px-4 py-4 pb-16">
         <AttendanceDashboard
-          presentToday={counts.presentToday}
-          absentToday={counts.absentToday}
+          present={counts.present}
+          absent={counts.absent}
           total={counts.total}
+          selectedDay={selectedDay}
+          today={today}
+          onSelectDay={setSelectedDay}
+          records={selectedRecords ?? []}
         />
+
 
         {!hydrated ? (
           <div className="mt-16 text-center text-muted-foreground">
