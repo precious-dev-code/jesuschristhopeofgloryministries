@@ -357,6 +357,7 @@ function AttendanceComponent() {
               <MemberCard
                 key={member.id}
                 member={member}
+                recordedToday={todayStatus.get(member.id) ?? null}
                 pending={pendingId === member.id}
                 onMark={handleMark}
                 onEdit={() => setEditMember(member)}
@@ -372,20 +373,23 @@ function AttendanceComponent() {
 
 function MemberCard({
   member,
+  recordedToday,
   pending,
   onMark,
   onEdit,
   onDelete,
 }: {
   member: Member;
+  recordedToday: string | null;
   pending: boolean;
   onMark: (member: Member, status: "Present" | "Absent") => void;
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const present = member.status === "Present";
-  const absent = member.status === "Absent";
-  const locked = isToday(member.last_marked_at);
+  const present = recordedToday === "Present";
+  const absent = recordedToday === "Absent";
+  const locked = recordedToday !== null;
+
 
 
   return (
