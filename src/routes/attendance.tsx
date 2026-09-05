@@ -522,31 +522,42 @@ function AttendanceButton({
 }
 
 function AttendanceDashboard({
-  presentToday,
-  absentToday,
+  present,
+  absent,
   total,
+  selectedDay,
+  today,
+  onSelectDay,
+  records,
 }: {
-  presentToday: number;
-  absentToday: number;
+  present: number;
+  absent: number;
   total: number;
+  selectedDay: string;
+  today: string;
+  onSelectDay: (day: string) => void;
+  records: AttendanceRecord[];
 }) {
+  const [showRecords, setShowRecords] = useState(false);
+  const isToday = selectedDay === today;
+
   const stats = [
     {
-      label: "Present Today",
-      value: presentToday,
+      label: "Present",
+      value: present,
       icon: Check,
       chip: "bg-check-in-soft text-check-in",
       valueClass: "text-check-in",
     },
     {
-      label: "Absent Today",
-      value: absentToday,
+      label: "Absent",
+      value: absent,
       icon: X,
       chip: "bg-check-out-soft text-check-out",
       valueClass: "text-check-out",
     },
     {
-      label: "Total Members",
+      label: "Recorded",
       value: total,
       icon: Users,
       chip: "bg-primary/15 text-primary",
@@ -556,6 +567,31 @@ function AttendanceDashboard({
 
   return (
     <section aria-label="Attendance dashboard" className="mb-4">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <label className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <CalendarDays className="h-4 w-4 text-accent" />
+          Attendance date
+        </label>
+        <div className="flex items-center gap-2">
+          {!isToday ? (
+            <button
+              type="button"
+              onClick={() => onSelectDay(today)}
+              className="rounded-lg px-2 py-1 text-[11px] font-semibold text-accent hover:bg-muted"
+            >
+              Today
+            </button>
+          ) : null}
+          <input
+            type="date"
+            value={selectedDay}
+            max={today}
+            onChange={(e) => onSelectDay(e.target.value || today)}
+            className="h-9 rounded-xl border border-border bg-input px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+      </div>
+
       <div className="grid grid-cols-3 gap-2">
         {stats.map((stat) => (
           <div
@@ -579,7 +615,58 @@ function AttendanceDashboard({
           </div>
         ))}
       </div>
+
+      <button
+        type="button"
+        onClick={() => setShowRecords((v) => !v)}
+        className="mt-2 flex w-full items-center justify-between rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground shadow-sm"
+      >
+        <span>
+          {isToday ? "Today's register" : `Register for ${selectedDay}`}
+        </span>
+        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          {showRecords ? "Hide" : `View (${records.length})`}
+        </span>
+      </button>
+
+      {showRecords ? (
+        records.length === 0 ? (
+          <p className="mt-2 rounded-xl border border-border bg-card px-3 py-4 text-center text-sm text-muted-foreground">
+            No attendance recorded on this date.
+          </p>
+        ) : (
+          <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
+            {records.map((r) => (
+              <li
+                key={r.id}
+                className="flex items-center justify-between gap-3 px-3 py-2"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{r.member_name}</p>
+                  <p className="truncate text-[11px] text-muted-foreground">
+                    {r.phone ? `${r.phone} • ` : ""}
+                    {new Date(r.marked_at).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+                <span
+                  className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                    r.status === "Present"
+                      ? "bg-check-in-soft text-check-in"
+                      : "bg-check-out-soft text-check-out"
+                  }`}
+                >
+                  {r.status}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )
+      ) : null}
     </section>
   );
 }
+
 
