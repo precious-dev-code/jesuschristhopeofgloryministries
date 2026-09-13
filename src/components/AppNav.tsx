@@ -31,6 +31,15 @@ export function AppNav() {
         <ClipboardList className="h-4 w-4" />
         Member Attendance
       </Link>
+      <Link
+        to="/report"
+        className={base}
+        activeProps={{ className: `${base} ${active}` }}
+        inactiveProps={{ className: `${base} ${inactive}` }}
+      >
+        <BarChart3 className="h-4 w-4" />
+        Sunday Report
+      </Link>
     </nav>
   );
 }
