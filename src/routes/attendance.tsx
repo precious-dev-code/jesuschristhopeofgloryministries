@@ -230,8 +230,9 @@ function AttendanceComponent() {
     if (!deleteTarget || deleting) return;
     setDeleting(true);
     try {
-      await deleteMember({ data: { memberId: deleteTarget.id } });
+      await deleteMember({ data: { memberId: deleteTarget.id, date: today } });
       await qc.invalidateQueries({ queryKey: ["members"] });
+      await qc.invalidateQueries({ queryKey: ["attendance_records"] });
       toast.success(`${deleteTarget.member_name} removed`);
       setDeleteTarget(null);
     } catch (err) {

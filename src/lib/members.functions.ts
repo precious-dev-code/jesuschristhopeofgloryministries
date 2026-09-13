@@ -72,12 +72,39 @@ export const updateMember = createServerFn({ method: "POST" })
 
 export const deleteMember = createServerFn({ method: "POST" })
   .inputValidator((data) =>
-    z.object({ memberId: z.string().uuid() }).parse(data),
+    z
+      .object({
+        memberId: z.string().uuid(),
+        // Local day whose register entry should also be removed so the
+        // dashboard counts subtract. Past dates are left untouched.
+        date: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/)
+          .optional(),
+      })
+      .parse(data),
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
+
+    const date = data.date ?? new Date().toISOString().slice(0, 10);
+
+    // Remove this member's register entry for the given day so the
+    // Present/Absent/Recorded totals subtract immediately. Records from
+    // other dates are preserved for the historical register.
+    const { error: recordError } = await supabaseAdmin
+      .from("attendance_records")
+      .delete()
+      .eq("member_id", data.memberId)
+      .eq("attendance_date", date);
+
+    if (recordError) {
+      throw new Error(
+        `Failed to remove attendance record: ${recordError.message}`,
+      );
+    }
 
     const { error } = await supabaseAdmin
       .from("members")
