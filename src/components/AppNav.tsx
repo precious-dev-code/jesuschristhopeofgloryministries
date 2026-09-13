@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Baby, ClipboardList } from "lucide-react";
+import { Baby, BarChart3, ClipboardList } from "lucide-react";
 
 /**
  * Main menu shared across pages: Kids Check-In and Member Attendance.
