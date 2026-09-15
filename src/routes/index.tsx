@@ -37,6 +37,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AddChildDialog, type EditableChild } from "@/components/AddChildDialog";
 import { AppNav } from "@/components/AppNav";
+import { ChurchEntrance } from "@/components/ChurchEntrance";
+import logoAsset from "@/assets/hope-of-glory-logo.jpg.asset.json";
 
 type Child = Database["public"]["Tables"]["children"]["Row"];
 
@@ -107,10 +109,17 @@ function CheckInComponent() {
   const [deleteTarget, setDeleteTarget] = useState<Child | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [enteredChurch, setEnteredChurch] = useState(false);
 
   useEffect(() => {
     setHydrated(true);
+    setEnteredChurch(window.sessionStorage.getItem("glorygate-entered") === "true");
   }, []);
+
+  function enterChurch() {
+    window.sessionStorage.setItem("glorygate-entered", "true");
+    setEnteredChurch(true);
+  }
 
   const { data: children } = useQuery(childrenQueryOptions());
   const { data: todayKeys } = useQuery({
@@ -229,24 +238,22 @@ function CheckInComponent() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {hydrated && !enteredChurch ? <ChurchEntrance onEnter={enterChurch} /> : null}
       {/* Sticky header with search */}
-      <header className="sticky top-0 z-10 border-b border-border bg-card/90 backdrop-blur supports-[backdrop-filter]:bg-card/70">
-        <div className="mx-auto max-w-xl px-4 pb-3 pt-4">
+      <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur-2xl">
+        <div className="mx-auto max-w-6xl px-4 pb-4 pt-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
-              <Users className="h-5 w-5" />
-            </div>
+            <img src={logoAsset.url} alt="Jesus Christ Hope of Glory Ministries" className="h-12 w-12 shrink-0 rounded-full border border-primary/30 object-cover shadow-sanctuary" />
             <div className="min-w-0 flex-1">
-              <h1 className="truncate text-lg font-bold leading-tight tracking-tight">
+              <h1 className="truncate font-display text-xl font-semibold leading-tight">
                 GloryGate <span className="text-accent">Connect</span>
               </h1>
-              <p className="truncate text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                Jesus Christ Hope of Glory Ministries
+              <p className="truncate text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
+                Kids Ministry Sanctuary
               </p>
             </div>
+            <AppNav />
           </div>
-
-          <AppNav />
 
           <div className="mt-3 flex items-center gap-2">
             <div className="relative flex-1">
@@ -336,7 +343,7 @@ function CheckInComponent() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <main className="mx-auto max-w-xl px-4 py-4 pb-16">
+      <main className="mx-auto max-w-6xl px-4 py-6 pb-16 sm:px-6">
         {!hydrated ? (
           <div className="mt-16 text-center text-muted-foreground">
             <Loader2 className="mx-auto h-6 w-6 animate-spin opacity-60" />
@@ -352,7 +359,7 @@ function CheckInComponent() {
           </div>
         ) : (
 
-          <ul className="space-y-3">
+          <ul className="grid gap-3 md:grid-cols-2">
             {filtered.map((child) => (
               <ChildCard
                 key={child.id}
@@ -394,7 +401,7 @@ function ChildCard({
   const waHref = phoneDigits ? `https://wa.me/${phoneDigits}` : undefined;
 
   return (
-    <li className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+    <li className="sanctuary-card rounded-2xl border border-border bg-card p-4 shadow-sanctuary">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">

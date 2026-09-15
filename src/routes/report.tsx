@@ -13,6 +13,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { AppNav } from "@/components/AppNav";
+import logoAsset from "@/assets/hope-of-glory-logo.jpg.asset.json";
 
 type AttendanceRecord = {
   id: string;
@@ -131,17 +132,15 @@ function ReportComponent() {
 
   return (
     <div className="min-h-screen bg-background text-foreground print:bg-white">
-      <header className="sticky top-0 z-10 border-b border-border bg-card/90 backdrop-blur supports-[backdrop-filter]:bg-card/70 print:hidden">
-        <div className="mx-auto max-w-xl px-4 pb-3 pt-4">
+      <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur-2xl print:hidden">
+        <div className="mx-auto max-w-6xl px-4 pb-4 pt-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
-              <BarChart3 className="h-5 w-5" />
-            </div>
+            <img src={logoAsset.url} alt="Jesus Christ Hope of Glory Ministries" className="h-12 w-12 shrink-0 rounded-full border border-primary/30 object-cover shadow-sanctuary" />
             <div className="min-w-0 flex-1">
-              <h1 className="truncate text-lg font-bold leading-tight tracking-tight">
+              <h1 className="truncate font-display text-xl font-semibold leading-tight">
                 GloryGate <span className="text-accent">Connect</span>
               </h1>
-              <p className="truncate text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              <p className="truncate text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
                 Sunday Report
               </p>
             </div>
@@ -154,9 +153,8 @@ function ReportComponent() {
               <span className="hidden sm:inline">Print</span>
               <span className="sr-only sm:hidden">Print report</span>
             </Button>
+            <AppNav />
           </div>
-
-          <AppNav />
         </div>
       </header>
 
@@ -173,7 +171,7 @@ function ReportComponent() {
         </p>
       </div>
 
-      <main className="mx-auto max-w-xl px-4 py-4 pb-16 print:max-w-none print:px-6 print:py-4">
+      <main className="mx-auto max-w-6xl px-4 py-6 pb-16 sm:px-6 print:max-w-none print:px-6 print:py-4">
         {!hydrated ? (
           <div className="mt-16 text-center text-muted-foreground print:hidden">
             <Loader2 className="mx-auto h-6 w-6 animate-spin opacity-60" />
@@ -187,14 +185,14 @@ function ReportComponent() {
             </p>
           </div>
         ) : (
-          <ul className="space-y-3 print:space-y-4">
+          <ul className="grid gap-4 lg:grid-cols-2 print:block print:space-y-4">
             {days.map((g) => {
               const total = g.present.length + g.absent.length;
               const open = openDays.has(g.day);
               return (
                 <li
                   key={g.day}
-                  className="rounded-2xl border border-border bg-card p-4 shadow-sm print:break-inside-avoid print:rounded-none print:border-0 print:border-b print:border-gray-300 print:bg-white print:p-0 print:pb-4 print:shadow-none"
+                  className="sanctuary-card rounded-2xl border border-border bg-card p-5 shadow-sanctuary print:break-inside-avoid print:rounded-none print:border-0 print:border-b print:border-gray-300 print:bg-white print:p-0 print:pb-4 print:shadow-none"
                 >
                   <button
                     type="button"
