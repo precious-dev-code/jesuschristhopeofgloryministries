@@ -19,6 +19,8 @@
  */
 
 @theme inline {
+  --font-sans: "Epilogue", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Urbanist", ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -65,30 +67,32 @@
   --color-check-out: var(--check-out);
   --color-check-out-foreground: var(--check-out-foreground);
   --color-check-out-soft: var(--check-out-soft);
+  --shadow-sanctuary: var(--sanctuary-shadow);
 }
 
 :root {
-  --radius: 0.875rem;
-  /* GloryGate Connect — navy blue background with warm gold accents. */
-  --background: oklch(0.18 0.04 262);
-  --foreground: oklch(0.96 0.02 85);
-  --card: oklch(0.24 0.05 263);
-  --card-foreground: oklch(0.96 0.02 85);
-  --popover: oklch(0.24 0.05 263);
-  --popover-foreground: oklch(0.96 0.02 85);
-  --primary: oklch(0.82 0.13 85);
-  --primary-foreground: oklch(0.2 0.05 262);
-  --secondary: oklch(0.3 0.05 262);
-  --secondary-foreground: oklch(0.92 0.03 85);
-  --muted: oklch(0.28 0.04 263);
-  --muted-foreground: oklch(0.72 0.04 85);
-  --accent: oklch(0.82 0.13 85);
-  --accent-foreground: oklch(0.2 0.05 262);
+  --radius: 1rem;
+  /* Cinematic Navy — selected royal blue, black and restrained gold. */
+  --background: oklch(0.115 0.028 270);
+  --foreground: oklch(0.97 0.012 82);
+  --card: oklch(0.18 0.045 269 / 82%);
+  --card-foreground: oklch(0.97 0.012 82);
+  --popover: oklch(0.145 0.038 269);
+  --popover-foreground: oklch(0.97 0.012 82);
+  --primary: oklch(0.7 0.125 77);
+  --primary-foreground: oklch(0.13 0.025 270);
+  --secondary: oklch(0.25 0.075 269);
+  --secondary-foreground: oklch(0.95 0.015 82);
+  --muted: oklch(0.215 0.04 269);
+  --muted-foreground: oklch(0.72 0.035 265);
+  --accent: oklch(0.7 0.125 77);
+  --accent-foreground: oklch(0.13 0.025 270);
   --destructive: oklch(0.58 0.2 27);
   --destructive-foreground: oklch(0.99 0.01 27);
-  --border: oklch(0.35 0.04 263);
-  --input: oklch(0.3 0.04 263);
-  --ring: oklch(0.82 0.13 85);
+  --border: oklch(0.47 0.07 76 / 24%);
+  --input: oklch(0.22 0.04 269 / 88%);
+  --ring: oklch(0.7 0.125 77);
+  --sanctuary-shadow: 0 24px 70px oklch(0.02 0.01 270 / 42%), inset 0 1px 0 oklch(1 0 0 / 4%);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -161,5 +165,94 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    min-width: 320px;
+    background-image:
+      radial-gradient(circle at 50% -12%, oklch(0.31 0.1 268 / 24%), transparent 42%),
+      linear-gradient(180deg, oklch(0.135 0.04 269), var(--color-background) 42rem);
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 42%, transparent);
+    color: var(--foreground);
+  }
+}
+
+@keyframes entrance-push {
+  from { transform: scale(1); }
+  to { transform: scale(1.09); }
+}
+
+@keyframes entrance-fade {
+  0% { opacity: 1; }
+  58% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes doorway-light {
+  0% { opacity: 0; transform: scaleX(0.35); }
+  100% { opacity: 1; transform: scaleX(1); }
+}
+
+.church-entrance::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(ellipse at 50% 66%, oklch(0.97 0.07 83 / 80%), transparent 38%);
+}
+
+.church-entrance-opening {
+  animation: entrance-fade 900ms ease-in forwards;
+}
+
+.church-entrance-opening > img {
+  animation: entrance-push 900ms ease-in forwards;
+}
+
+.church-entrance-opening::after {
+  animation: doorway-light 650ms ease-out forwards;
+}
+
+.sanctuary-card {
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  transition: border-color 240ms ease, transform 240ms ease, box-shadow 240ms ease;
+}
+
+.sanctuary-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 24% auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  opacity: 0.55;
+}
+
+@media (hover: hover) {
+  .sanctuary-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--primary) 42%, transparent);
+    box-shadow: 0 28px 80px oklch(0.02 0.01 270 / 52%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
