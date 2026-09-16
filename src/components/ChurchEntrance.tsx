@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ArrowDown, DoorOpen } from "lucide-react";
 
 import churchExterior from "@/assets/church-exterior.jpg";
@@ -5,8 +6,16 @@ import logoAsset from "@/assets/hope-of-glory-logo.jpg.asset.json";
 import { Button } from "@/components/ui/button";
 
 export function ChurchEntrance({ onEnter }: { onEnter: () => void }) {
+  const [opening, setOpening] = useState(false);
+
+  function handleEnter() {
+    if (opening) return;
+    setOpening(true);
+    window.setTimeout(onEnter, 850);
+  }
+
   return (
-    <main className="church-entrance fixed inset-0 z-50 overflow-hidden bg-background">
+    <main className={`church-entrance fixed inset-0 z-50 overflow-hidden bg-background ${opening ? "church-entrance-opening" : ""}`}>
       <img
         src={churchExterior}
         alt="A grand illuminated church entrance at blue hour"
@@ -38,11 +47,12 @@ export function ChurchEntrance({ onEnter }: { onEnter: () => void }) {
           </p>
           <Button
             type="button"
-            onClick={onEnter}
+        onClick={handleEnter}
+        disabled={opening}
             className="entrance-button h-14 rounded-full border border-primary/60 bg-primary px-8 text-sm font-bold uppercase tracking-widest text-primary-foreground shadow-sanctuary transition-transform duration-300 hover:scale-[1.03] hover:bg-primary/90"
           >
             <DoorOpen className="h-5 w-5" />
-            Enter Church
+            {opening ? "Entering…" : "Enter Church"}
           </Button>
           <ArrowDown className="mt-4 h-4 w-4 animate-bounce text-primary" aria-hidden="true" />
         </div>
