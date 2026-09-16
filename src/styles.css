@@ -87,8 +87,8 @@
   --muted-foreground: oklch(0.72 0.035 265);
   --accent: oklch(0.7 0.125 77);
   --accent-foreground: oklch(0.13 0.025 270);
-  --destructive: oklch(0.58 0.2 27);
-  --destructive-foreground: oklch(0.99 0.01 27);
+  --destructive: oklch(0.766528 0.138677 91.059);
+  --destructive-foreground: oklch(0.97 0.012 82);
   --border: oklch(0.47 0.07 76 / 24%);
   --input: oklch(0.22 0.04 269 / 88%);
   --ring: oklch(0.7 0.125 77);
@@ -107,13 +107,13 @@
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
 
-  /* Status action colors — explicit green / red the ushers asked for. */
-  --check-in: oklch(0.55 0.13 158);
-  --check-in-foreground: oklch(0.99 0.02 158);
-  --check-in-soft: oklch(0.95 0.04 158);
-  --check-out: oklch(0.56 0.18 25);
-  --check-out-foreground: oklch(0.99 0.02 25);
-  --check-out-soft: oklch(0.955 0.035 25);
+  /* Unified ministry status palette — gold actions on navy surfaces. */
+  --check-in: oklch(0.766528 0.138677 91.059);
+  --check-in-foreground: oklch(0.97 0.012 82);
+  --check-in-soft: oklch(0.293463 0.066228 262.899);
+  --check-out: oklch(0.766528 0.138677 91.059);
+  --check-out-foreground: oklch(0.97 0.012 82);
+  --check-out-soft: oklch(0.293463 0.066228 262.899);
 }
 
 .dark {
@@ -131,7 +131,7 @@
   --muted-foreground: oklch(0.704 0.04 256.788);
   --accent: oklch(0.279 0.041 260.031);
   --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
+  --destructive: oklch(0.766528 0.138677 91.059);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
@@ -149,12 +149,12 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
-  --check-in: oklch(0.7 0.16 145);
-  --check-in-foreground: oklch(0.16 0.04 145);
-  --check-in-soft: oklch(0.32 0.06 145);
-  --check-out: oklch(0.68 0.19 27);
-  --check-out-foreground: oklch(0.16 0.05 27);
-  --check-out-soft: oklch(0.34 0.08 27);
+  --check-in: oklch(0.766528 0.138677 91.059);
+  --check-in-foreground: oklch(0.984 0.003 247.858);
+  --check-in-soft: oklch(0.293463 0.066228 262.899);
+  --check-out: oklch(0.766528 0.138677 91.059);
+  --check-out-foreground: oklch(0.984 0.003 247.858);
+  --check-out-soft: oklch(0.293463 0.066228 262.899);
 }
 
 @layer base {
