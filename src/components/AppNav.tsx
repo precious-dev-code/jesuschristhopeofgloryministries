@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Baby, BarChart3, ClipboardList, Menu } from "lucide-react";
+import { Baby, BarChart3, ClipboardList, HeartHandshake, History, Menu } from "lucide-react";
 
 import logoAsset from "@/assets/hope-of-glory-logo.jpg.asset.json";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ const items = [
   { title: "Kids Check-In", subtitle: "Children's ministry register", url: "/", icon: Baby },
   { title: "Member Attendance", subtitle: "Sunday attendance register", url: "/attendance", icon: ClipboardList },
   { title: "Sunday Report", subtitle: "Dated records and printing", url: "/report", icon: BarChart3 },
+  { title: "Give Now", subtitle: "Tithes, offerings and special projects", url: "/give", icon: HeartHandshake },
+  { title: "Giving History", subtitle: "Gift dates, amounts and status", url: "/giving-history", icon: History },
 ] as const;
 
 export function AppNav() {
@@ -37,7 +39,7 @@ export function AppNav() {
       </SheetTrigger>
       <SheetContent side="right" className="w-[88vw] border-l border-primary/25 bg-background/95 p-0 backdrop-blur-3xl sm:max-w-md">
         <div className="h-1 bg-linear-to-r from-transparent via-primary to-transparent opacity-70" />
-        <div className="flex h-full flex-col px-6 pb-8 pt-10">
+        <div className="flex h-full flex-col overflow-y-auto px-6 pb-8 pt-10">
           <SheetHeader className="items-center text-center">
             <img
               src={logoAsset.url}
