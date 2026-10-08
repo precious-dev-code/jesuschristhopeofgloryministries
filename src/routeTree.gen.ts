@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AttendanceRouteImport } from './routes/attendance'
+import { Route as GiveRouteImport } from './routes/give'
+import { Route as GivingHistoryRouteImport } from './routes/giving-history'
 import { Route as ReportRouteImport } from './routes/report'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +25,16 @@ const AttendanceRoute = AttendanceRouteImport.update({
   path: '/attendance',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GiveRoute = GiveRouteImport.update({
+  id: '/give',
+  path: '/give',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GivingHistoryRoute = GivingHistoryRouteImport.update({
+  id: '/giving-history',
+  path: '/giving-history',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReportRoute = ReportRouteImport.update({
   id: '/report',
   path: '/report',
@@ -32,30 +44,38 @@ const ReportRoute = ReportRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/attendance': typeof AttendanceRoute
+  '/give': typeof GiveRoute
+  '/giving-history': typeof GivingHistoryRoute
   '/report': typeof ReportRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/attendance': typeof AttendanceRoute
+  '/give': typeof GiveRoute
+  '/giving-history': typeof GivingHistoryRoute
   '/report': typeof ReportRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/attendance': typeof AttendanceRoute
+  '/give': typeof GiveRoute
+  '/giving-history': typeof GivingHistoryRoute
   '/report': typeof ReportRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/attendance' | '/report'
+  fullPaths: '/' | '/attendance' | '/give' | '/giving-history' | '/report'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/attendance' | '/report'
-  id: '__root__' | '/' | '/attendance' | '/report'
+  to: '/' | '/attendance' | '/give' | '/giving-history' | '/report'
+  id: '__root__' | '/' | '/attendance' | '/give' | '/giving-history' | '/report'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AttendanceRoute: typeof AttendanceRoute
+  GiveRoute: typeof GiveRoute
+  GivingHistoryRoute: typeof GivingHistoryRoute
   ReportRoute: typeof ReportRoute
 }
 
@@ -75,6 +95,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AttendanceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/give': {
+      id: '/give'
+      path: '/give'
+      fullPath: '/give'
+      preLoaderRoute: typeof GiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/giving-history': {
+      id: '/giving-history'
+      path: '/giving-history'
+      fullPath: '/giving-history'
+      preLoaderRoute: typeof GivingHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/report': {
       id: '/report'
       path: '/report'
@@ -88,6 +122,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AttendanceRoute: AttendanceRoute,
+  GiveRoute: GiveRoute,
+  GivingHistoryRoute: GivingHistoryRoute,
   ReportRoute: ReportRoute,
 }
 export const routeTree = rootRouteImport
