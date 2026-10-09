@@ -40,7 +40,7 @@ function GivingHistoryPage() {
     </div>
     <div className="mb-8 grid grid-cols-2 items-end gap-4 sm:grid-cols-4">
       <div className="space-y-2"><Label htmlFor="history-type">Type</Label><Select value={type} onValueChange={setType}><SelectTrigger id="history-type" className="h-11 bg-input"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All types</SelectItem>{givingTypes.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select></div>
-      <div className="space-y-2"><Label htmlFor="history-status">Status</Label><Select value={status} onValueChange={setStatus}><SelectTrigger id="history-status" className="h-11 bg-input"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All statuses</SelectItem><SelectItem value="Pending">Pending</SelectItem></SelectContent></Select></div>
+      <div className="space-y-2"><Label htmlFor="history-status">Status</Label><Select value={status} onValueChange={setStatus}><SelectTrigger id="history-status" className="h-11 bg-input"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All statuses</SelectItem><SelectItem value="Pending">Pending</SelectItem><SelectItem value="Paid">Paid</SelectItem><SelectItem value="Failed">Failed</SelectItem></SelectContent></Select></div>
       <div className="min-w-0 space-y-2"><Label htmlFor="history-from">From</Label><Input id="history-from" type="date" value={from} onChange={(event) => setFrom(event.target.value)} className="h-11 min-w-0 bg-input [color-scheme:dark]" /></div>
       <div className="min-w-0 space-y-2"><Label htmlFor="history-to">To</Label><Input id="history-to" type="date" value={to} onChange={(event) => setTo(event.target.value)} className="h-11 min-w-0 bg-input [color-scheme:dark]" /></div>
     </div>
@@ -62,6 +62,6 @@ function GivingHistoryPage() {
         </tbody>
       </table>
     </div>
-    <p className="mt-5 text-xs leading-relaxed text-muted-foreground">Device-only entries · Pending gifts are not completed payments.</p>
+    <p className="mt-5 text-xs leading-relaxed text-muted-foreground">Device-only entries · Only gifts marked Paid were confirmed by Paystack.</p>
   </GivingShell>;
 }
