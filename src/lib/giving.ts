@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 
 export const givingTypes = ["Tithe", "Offering", "Special Project"] as const;
 export type GivingType = (typeof givingTypes)[number];
+export const giftStatuses = ["Pending", "Paid", "Failed"] as const;
+export type GiftStatus = (typeof giftStatuses)[number];
 export type Gift = {
   id: string;
   date: string;
   amount: number;
   type: GivingType;
-  status: "Pending";
+  status: GiftStatus;
   name: string;
   prayer: string;
 };
@@ -21,7 +23,7 @@ export function readGifts(): Gift[] {
     typeof gift.id === "string" && typeof gift.date === "string" &&
     Number.isFinite(Date.parse(gift.date)) &&
     typeof gift.amount === "number" && Number.isFinite(gift.amount) && gift.amount > 0 &&
-    givingTypes.includes(gift.type) && gift.status === "Pending" &&
+    givingTypes.includes(gift.type) && giftStatuses.includes(gift.status) &&
     typeof gift.name === "string" && typeof gift.prayer === "string",
   );
 }
@@ -31,6 +33,13 @@ export function saveGift(input: Pick<Gift, "amount" | "type" | "name" | "prayer"
   window.localStorage.setItem(storageKey, JSON.stringify([gift, ...readGifts()]));
   window.dispatchEvent(new Event("giving-updated"));
   return gift;
+}
+
+export function updateGiftStatus(id: string, status: GiftStatus) {
+  const gifts = readGifts().map((gift) => (gift.id === id ? { ...gift, status } : gift));
+  window.localStorage.setItem(storageKey, JSON.stringify(gifts));
+  window.dispatchEvent(new Event("giving-updated"));
+  return gifts.find((gift) => gift.id === id) ?? null;
 }
 
 export function useGifts() {
