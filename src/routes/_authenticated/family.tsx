@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/family")({
-  validateSearch: (search: Record<string, unknown>) => ({ member: typeof search.member === "string" ? search.member : undefined }),
+  validateSearch: (search: Record<string, unknown>): { member?: string } => typeof search['member'] === "string" ? { member: search['member'] } : {},
   head: () => ({ meta: [
     { title: "Member Families — GloryGate Connect" }, { name: "description", content: "Private staff management of church member family relationships." },
     { property: "og:title", content: "Member Families — GloryGate Connect" }, { property: "og:description", content: "Private family records at Jesus Christ Hope of Glory Ministries." },
@@ -90,7 +90,7 @@ function FamilyPage() {
     <Dialog open={open} onOpenChange={value => { if (!busy) setOpen(value); }}><DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg" aria-describedby={undefined}><DialogHeader><DialogTitle>{edit ? "Edit relationship" : "Add relative"}</DialogTitle></DialogHeader>
       <Label htmlFor="relative-search">Existing member</Label><Input id="relative-search" type="search" value={pickerSearch} onChange={e => setPickerSearch(e.target.value)} placeholder="Search by member name" />
       <div className="max-h-40 space-y-1 overflow-y-auto" role="group" aria-label="Existing member picker">{members.filter(m => m.id !== selectedId && m.member_name.toLowerCase().includes(pickerSearch.toLowerCase())).map(m => <Button key={m.id} variant={relativeId === m.id ? "secondary" : "ghost"} aria-pressed={relativeId === m.id} className="h-auto min-h-10 w-full justify-start whitespace-normal text-left" onClick={() => setRelativeId(m.id)}>{m.member_name}</Button>)}</div>
-      <Label>{selected?.member_name} is</Label><Select value={role} onValueChange={(value: FamilyRole) => { setRole(value); const options = reciprocals[value]; setReciprocalRole(options.length === 1 ? options[0] : ""); }}><SelectTrigger aria-label="Relationship role"><SelectValue /></SelectTrigger><SelectContent>{familyRoles.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent></Select>
+      <Label>{selected?.member_name} is</Label><Select value={role} onValueChange={(value: FamilyRole) => { setRole(value); const options = reciprocals[value]; setReciprocalRole(options.length === 1 ? options[0] ?? "" : ""); }}><SelectTrigger aria-label="Relationship role"><SelectValue /></SelectTrigger><SelectContent>{familyRoles.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent></Select>
       <p className="text-sm">of <strong>{relative?.member_name ?? "…"}</strong></p>
       <Label>{relative?.member_name ?? "Relative"} is</Label><Select value={reciprocalRole} onValueChange={(value: FamilyRole) => setReciprocalRole(value)}><SelectTrigger aria-label="Reciprocal role"><SelectValue placeholder="Choose reciprocal role" /></SelectTrigger><SelectContent>{reciprocals[role].map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent></Select>
       <p className="text-sm">of <strong>{selected?.member_name}</strong></p>
