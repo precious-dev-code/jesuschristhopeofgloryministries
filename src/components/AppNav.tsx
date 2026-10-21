@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Baby, BarChart3, ClipboardList, HeartHandshake, History, Menu } from "lucide-react";
+import { Baby, BarChart3, ClipboardList, HeartHandshake, History, Menu, Users } from "lucide-react";
 
 import logoAsset from "@/assets/hope-of-glory-logo.jpg.asset.json";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import {
 const items = [
   { title: "Kids Check-In", subtitle: "Children's ministry register", url: "/", icon: Baby },
   { title: "Member Attendance", subtitle: "Sunday attendance register", url: "/attendance", icon: ClipboardList },
+  { title: "Family", subtitle: "Private staff member relationships", url: "/family", icon: Users },
   { title: "Sunday Report", subtitle: "Dated records and printing", url: "/report", icon: BarChart3 },
   { title: "Give Now", subtitle: "Tithes, offerings and special projects", url: "/give", icon: HeartHandshake },
   { title: "Giving History", subtitle: "Gift dates, amounts and status", url: "/giving-history", icon: History },

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   useQueryClient,
   useQuery,
@@ -284,6 +284,7 @@ function AttendanceComponent() {
               <span className="sr-only sm:hidden">Add Member</span>
             </Button>
           </div>
+          <Button asChild variant="ghost" className="mt-2"><Link to="/family"><Users className="h-4 w-4" />Family · Staff</Link></Button>
 
         </div>
       </header>
@@ -421,6 +422,7 @@ function MemberCard({
           ) : null}
         </div>
         <div className="flex shrink-0 gap-1">
+          <Button asChild variant="ghost" size="icon" title="View family"><Link to="/family" search={{ member: member.id }} aria-label={`Family of ${member.member_name}`}><Users className="h-4 w-4" /></Link></Button>
           <button
             type="button"
             onClick={onEdit}

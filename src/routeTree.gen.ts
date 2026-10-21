@@ -10,19 +10,31 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AttendanceRouteImport } from './routes/attendance'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as GiveRouteImport } from './routes/give'
 import { Route as GivingHistoryRouteImport } from './routes/giving-history'
 import { Route as ReportRouteImport } from './routes/report'
+import { Route as AuthenticatedFamilyRouteImport } from './routes/_authenticated/family'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AttendanceRoute = AttendanceRouteImport.update({
   id: '/attendance',
   path: '/attendance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GiveRoute = GiveRouteImport.update({
@@ -40,40 +52,77 @@ const ReportRoute = ReportRouteImport.update({
   path: '/report',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedFamilyRoute = AuthenticatedFamilyRouteImport.update({
+  id: '/family',
+  path: '/family',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/attendance': typeof AttendanceRoute
+  '/auth': typeof AuthRoute
   '/give': typeof GiveRoute
   '/giving-history': typeof GivingHistoryRoute
   '/report': typeof ReportRoute
+  '/family': typeof AuthenticatedFamilyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/attendance': typeof AttendanceRoute
+  '/auth': typeof AuthRoute
   '/give': typeof GiveRoute
   '/giving-history': typeof GivingHistoryRoute
   '/report': typeof ReportRoute
+  '/family': typeof AuthenticatedFamilyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/attendance': typeof AttendanceRoute
+  '/auth': typeof AuthRoute
   '/give': typeof GiveRoute
   '/giving-history': typeof GivingHistoryRoute
   '/report': typeof ReportRoute
+  '/_authenticated/family': typeof AuthenticatedFamilyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/attendance' | '/give' | '/giving-history' | '/report'
+  fullPaths:
+    | '/'
+    | '/attendance'
+    | '/auth'
+    | '/give'
+    | '/giving-history'
+    | '/report'
+    | '/family'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/attendance' | '/give' | '/giving-history' | '/report'
-  id: '__root__' | '/' | '/attendance' | '/give' | '/giving-history' | '/report'
+  to:
+    | '/'
+    | '/attendance'
+    | '/auth'
+    | '/give'
+    | '/giving-history'
+    | '/report'
+    | '/family'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/attendance'
+    | '/auth'
+    | '/give'
+    | '/giving-history'
+    | '/report'
+    | '/_authenticated/family'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AttendanceRoute: typeof AttendanceRoute
+  AuthRoute: typeof AuthRoute
   GiveRoute: typeof GiveRoute
   GivingHistoryRoute: typeof GivingHistoryRoute
   ReportRoute: typeof ReportRoute
@@ -88,11 +137,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/attendance': {
       id: '/attendance'
       path: '/attendance'
       fullPath: '/attendance'
       preLoaderRoute: typeof AttendanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/give': {
@@ -116,12 +179,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/family': {
+      id: '/_authenticated/family'
+      path: '/family'
+      fullPath: '/family'
+      preLoaderRoute: typeof AuthenticatedFamilyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedFamilyRoute: typeof AuthenticatedFamilyRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedFamilyRoute: AuthenticatedFamilyRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AttendanceRoute: AttendanceRoute,
+  AuthRoute: AuthRoute,
   GiveRoute: GiveRoute,
   GivingHistoryRoute: GivingHistoryRoute,
   ReportRoute: ReportRoute,
