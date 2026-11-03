@@ -62,6 +62,6 @@ function GivingHistoryPage() {
         </tbody>
       </table>
     </div>
-    <p className="mt-5 text-xs leading-relaxed text-muted-foreground">Device-only entries · Only gifts marked Paid were confirmed by Paystack.</p>
+    <p className="mt-5 text-xs leading-relaxed text-muted-foreground">Entries are stored securely by the church · Only gifts marked Paid were confirmed by Paystack.</p>
   </GivingShell>;
 }
