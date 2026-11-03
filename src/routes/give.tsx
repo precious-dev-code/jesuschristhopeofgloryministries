@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { givingTypes, saveGift, updateGiftStatus, type GivingType } from "@/lib/giving";
+import { givingTypes, getDeviceToken, type GivingType } from "@/lib/giving";
 import { initializePayment, verifyPayment } from "@/lib/paystack.functions";
 
 export const Route = createFileRoute("/give")({
@@ -44,14 +44,14 @@ function GivePage() {
     window.history.replaceState(null, "", "/give");
     confirmPayment({ data: { reference } })
       .then(({ status }) => {
-        try { updateGiftStatus(reference, status); } catch { /* local record unavailable */ }
+        window.dispatchEvent(new Event("giving-updated"));
         setOutcome(status === "Paid"
           ? { ok: true, text: "Thank you! Your gift was received and is marked Paid in Giving History." }
           : status === "Failed"
-            ? { ok: false, text: "The payment was not completed. No money was taken." }
-            : { ok: false, text: "Your payment is still processing. Check Giving History shortly." });
+            ? { ok: false, text: "The payment was not completed. You can try again from Make a Gift." }
+            : { ok: false, text: "Your payment is still processing. Giving History will show it as Paid once Paystack confirms it." });
       })
-      .catch(() => setOutcome({ ok: false, text: "We could not confirm your payment yet. Please check Giving History shortly." }));
+      .catch(() => setOutcome({ ok: false, text: "We could not confirm your payment yet. Giving History will update automatically once Paystack confirms it." }));
   }, [confirmPayment]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -68,17 +68,21 @@ function GivePage() {
     setOutcome(null);
     try {
       const rounded = Math.round(numericAmount * 100) / 100;
-      const gift = saveGift({ amount: rounded, type, name: name.trim(), prayer: prayer.trim() });
-      try {
-        const { authorizationUrl } = await startPayment({ data: { amount: rounded, email: email.trim(), type, name: name.trim(), reference: gift.id, callbackUrl: `${window.location.origin}/give` } });
-        window.location.href = authorizationUrl;
-        return;
-      } catch (cause) {
-        updateGiftStatus(gift.id, "Failed");
-        setError(cause instanceof Error ? cause.message : "Payment could not be started. Please try again.");
-      }
-    } catch {
-      setError("Your gift could not be saved on this device. Please try again.");
+      const { authorizationUrl } = await startPayment({
+        data: {
+          amount: rounded,
+          email: email.trim(),
+          type,
+          name: name.trim(),
+          prayer: prayer.trim(),
+          deviceToken: getDeviceToken(),
+          callbackUrl: `${window.location.origin}/give`,
+        },
+      });
+      window.location.href = authorizationUrl;
+      return;
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Payment could not be started. Please try again.");
     }
     submitting.current = false;
     setSaving(false);
@@ -125,7 +129,7 @@ function GivePage() {
             <Label htmlFor="gift-prayer">Prayer request <span className="font-normal text-muted-foreground">(optional)</span></Label>
             <Textarea id="gift-prayer" maxLength={2000} value={prayer} onChange={(event) => setPrayer(event.target.value)} className="min-h-28 resize-y bg-input" />
           </div>
-          <p className="border-t border-border pt-5 text-sm leading-relaxed text-muted-foreground">You will be taken to Paystack’s secure page to complete your gift. Your record is kept on this device and marked Paid only after Paystack confirms it.</p>
+          <p className="border-t border-border pt-5 text-sm leading-relaxed text-muted-foreground">Your gift is recorded securely by the church before you pay. You will be taken to Paystack’s secure page to complete it, and the record is marked Paid only after Paystack confirms the payment.</p>
           {error ? <p role="alert" className="text-sm text-foreground">{error}</p> : null}
           <Button type="submit" disabled={saving} className="h-14 w-full bg-check-in text-primary-foreground hover:bg-check-in/90 text-base font-semibold">
             {saving ? <Loader2 className="animate-spin" /> : <HeartHandshake />}Give Now<ArrowRight />

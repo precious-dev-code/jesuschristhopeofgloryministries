@@ -165,6 +165,57 @@ export type Database = {
           },
         ]
       }
+      gifts: {
+        Row: {
+          amount_cents: number
+          confirmed_via: string | null
+          created_at: string
+          currency: string
+          device_token: string | null
+          donor_email: string
+          donor_name: string | null
+          gift_type: string
+          id: string
+          paid_at: string | null
+          prayer_request: string | null
+          reference: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          confirmed_via?: string | null
+          created_at?: string
+          currency?: string
+          device_token?: string | null
+          donor_email: string
+          donor_name?: string | null
+          gift_type: string
+          id?: string
+          paid_at?: string | null
+          prayer_request?: string | null
+          reference: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          confirmed_via?: string | null
+          created_at?: string
+          currency?: string
+          device_token?: string | null
+          donor_email?: string
+          donor_name?: string | null
+          gift_type?: string
+          id?: string
+          paid_at?: string | null
+          prayer_request?: string | null
+          reference?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       members: {
         Row: {
           created_at: string
@@ -215,7 +266,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      confirm_gift: {
+        Args: {
+          p_amount_cents: number
+          p_currency: string
+          p_reference: string
+          p_via: string
+        }
+        Returns: string
+      }
+      fail_gift: {
+        Args: { p_reference: string; p_via: string }
+        Returns: string
+      }
       has_family_access: { Args: never; Returns: boolean }
+      has_giving_access: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "owner" | "staff"
