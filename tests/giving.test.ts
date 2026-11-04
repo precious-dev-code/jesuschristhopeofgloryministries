@@ -1,3 +1,4 @@
+import { createHmac } from 'node:crypto';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
 import { readFileSync, mkdtempSync, rmSync } from 'node:fs';
@@ -22,7 +23,7 @@ async function clearHeaders(db: PGlite) {
 describe('Paystack webhook signature verification', () => {
   const body = JSON.stringify({ event: 'charge.success', data: { reference: 'GG-TEST' } });
   const secret = 'sk_test_signature_secret';
-  const valid = require('node:crypto').createHmac('sha512', secret).update(body).digest('hex');
+  const valid = createHmac('sha512', secret).update(body).digest('hex');
 
   it('accepts a correct HMAC-SHA512 signature', () => {
     expect(verifyPaystackSignature(body, valid, secret)).toBe(true);
