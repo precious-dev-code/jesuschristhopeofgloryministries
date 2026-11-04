@@ -12,9 +12,9 @@ import { initializePayment, verifyPayment } from "@/lib/paystack.functions";
 
 export const Route = createFileRoute("/give")({
   head: () => ({ meta: [
-    { title: "Make a Gift — GloryGate Connect" },
+    { title: "Give Now — Jesus Christ Hope of Glory Ministries" },
     { name: "description", content: "Prepare a tithe, offering or special project gift for Jesus Christ Hope of Glory Ministries." },
-    { property: "og:title", content: "Make a Gift — GloryGate Connect" },
+    { property: "og:title", content: "Give Now — Jesus Christ Hope of Glory Ministries" },
     { property: "og:description", content: "Giving at Jesus Christ Hope of Glory Ministries." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
@@ -46,12 +46,12 @@ function GivePage() {
       .then(({ status }) => {
         window.dispatchEvent(new Event("giving-updated"));
         setOutcome(status === "Paid"
-          ? { ok: true, text: "Thank you! Your gift was received and is marked Paid in Giving History." }
+          ? { ok: true, text: "Thank you! Paystack has confirmed your gift." }
           : status === "Failed"
             ? { ok: false, text: "The payment was not completed. You can try again from Make a Gift." }
-            : { ok: false, text: "Your payment is still processing. Giving History will show it as Paid once Paystack confirms it." });
+            : { ok: false, text: "Your payment is still processing. Please wait for confirmation before trying another payment." });
       })
-      .catch(() => setOutcome({ ok: false, text: "We could not confirm your payment yet. Giving History will update automatically once Paystack confirms it." }));
+      .catch(() => setOutcome({ ok: false, text: "We could not confirm your payment yet. If you were charged, please contact the church before trying again." }));
   }, [confirmPayment]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
