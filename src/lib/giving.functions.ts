@@ -12,7 +12,7 @@ export const getFinanceGifts = createServerFn({ method: "GET" })
     if (allowed !== true) return { allowed: false, gifts: [] as Gift[] };
     const { data: rows, error } = await context.supabase
       .from("gifts")
-      .select("reference,amount_cents,gift_type,status,donor_name,donor_email,prayer_request,created_at")
+      .select("reference,amount_cents,gift_type,status,donor_name,prayer_request,created_at")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) throw new Error("Church-wide giving history is unavailable right now.");
@@ -25,7 +25,6 @@ export const getFinanceGifts = createServerFn({ method: "GET" })
         status: row.status as GiftStatus,
         name: row.donor_name ?? "",
         prayer: row.prayer_request ?? "",
-        donorEmail: row.donor_email,
       }))
       .filter((gift) => givingTypes.includes(gift.type) && giftStatuses.includes(gift.status));
     return { allowed: true, gifts };
