@@ -27,20 +27,47 @@ function GivingHistoryPage() {
   const { gifts, ready, error } = useGifts();
   const fetchFinance = useServerFn(getFinanceGifts);
   const [finance, setFinance] = useState<{ allowed: boolean; gifts: Gift[] } | null>(null);
+  const [financeError, setFinanceError] = useState("");
+  const [financeReady, setFinanceReady] = useState(false);
   useEffect(() => {
     let cancelled = false;
-    void (async () => {
+    let generation = 0;
+    const refresh = async () => {
+      const current = ++generation;
       const { data } = await supabase.auth.getSession();
-      if (!data.session || cancelled) return;
+      if (cancelled || current !== generation) return;
+      if (!data.session) {
+        setFinance(null);
+        setFinanceError("");
+        setFinanceReady(true);
+        return;
+      }
       try {
         const result = await fetchFinance();
-        if (!cancelled) setFinance(result);
-      } catch { /* signed in without finance access */ }
-    })();
-    return () => { cancelled = true; };
+        if (!cancelled && current === generation) { setFinance(result); setFinanceError(""); }
+      } catch {
+        if (!cancelled && current === generation) { setFinance(null); setFinanceError("Church-wide giving history could not be loaded. Please refresh to try again."); }
+      } finally {
+        if (!cancelled && current === generation) setFinanceReady(true);
+      }
+    };
+    void refresh();
+    const onRefresh = () => void refresh();
+    const timer = window.setInterval(onRefresh, 30000);
+    window.addEventListener("focus", onRefresh);
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      // Clear privileged rows immediately when the session changes.
+      generation++;
+      setFinance(null);
+      setFinanceReady(false);
+      window.setTimeout(onRefresh, 0);
+    });
+    return () => { cancelled = true; generation++; window.clearInterval(timer); window.removeEventListener("focus", onRefresh); listener.subscription.unsubscribe(); };
   }, [fetchFinance]);
   const financeView = finance?.allowed === true;
   const source = financeView ? finance!.gifts : gifts;
+  const historyReady = financeReady && (financeView || ready);
+  const historyError = financeError || (financeView ? "" : error);
   const [type, setType] = useState("all");
   const [status, setStatus] = useState("all");
   const [from, setFrom] = useState("");
@@ -65,19 +92,20 @@ function GivingHistoryPage() {
     </div>
     {hasFilters ? <Button variant="ghost" onClick={() => { setType("all"); setStatus("all"); setFrom(""); setTo(""); }} className="mb-4 text-primary"><RotateCcw />Clear filters</Button> : null}
     {invalidRange ? <p role="alert" className="mb-4 text-sm">The end date must be on or after the start date.</p> : null}
-    {error ? <p role="alert" className="mb-4 text-sm">{error}</p> : null}
+    {financeView ? <p className="mb-4 flex items-center gap-2 text-sm text-primary"><ShieldCheck className="size-4" />Church-wide giving · Approved staff view</p> : null}
+    {historyError ? <p role="alert" className="mb-4 text-sm">{historyError}</p> : null}
     <div className="overflow-x-auto border-y border-border">
       <table className="w-full text-left text-sm">
-        <caption className="sr-only">Giving entries saved on this device</caption>
+        <caption className="sr-only">{financeView ? "Church-wide giving entries" : "Giving entries for this device"}</caption>
         <thead className="bg-secondary/50 text-muted-foreground"><tr>{["Date", "Amount", "Type", "Status"].map((heading) => <th key={heading} scope="col" className="px-3 py-4 font-medium sm:px-4">{heading}</th>)}</tr></thead>
         <tbody className="divide-y divide-border">
-          {ready && !error && !invalidRange ? filtered.map((gift) => <tr key={gift.id} className="hover:bg-card">
+          {historyReady && !historyError && !invalidRange ? filtered.map((gift) => <tr key={gift.id} className="hover:bg-card">
             <td className="px-3 py-5 sm:px-4"><time dateTime={gift.date}>{new Date(gift.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</time></td>
             <td className="px-3 py-5 font-medium tabular-nums sm:px-4">{formatGiftAmount(gift.amount)}</td>
             <td className="px-3 py-5 sm:px-4">{gift.type}</td>
             <td className="px-3 py-5 sm:px-4"><span className="inline-flex items-center gap-2 text-primary"><span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />{gift.status}</span></td>
           </tr>) : null}
-          {(!ready || error || invalidRange || !filtered.length) ? <tr><td colSpan={4} className="px-4 py-16 text-center text-muted-foreground">{!ready ? "Loading giving history…" : error ? "History unavailable" : invalidRange ? "Choose a valid date range" : gifts.length ? "No gifts match these filters" : "No giving entries yet"}</td></tr> : null}
+          {(!historyReady || historyError || invalidRange || !filtered.length) ? <tr><td colSpan={4} className="px-4 py-16 text-center text-muted-foreground">{!historyReady ? "Loading giving history…" : historyError ? "History unavailable" : invalidRange ? "Choose a valid date range" : source.length ? "No gifts match these filters" : "No giving entries yet"}</td></tr> : null}
         </tbody>
       </table>
     </div>

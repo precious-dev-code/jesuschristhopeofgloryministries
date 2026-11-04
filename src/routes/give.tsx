@@ -58,7 +58,7 @@ function GivePage() {
     event.preventDefault();
     if (submitting.current) return;
     const numericAmount = Number(amount);
-    if (!Number.isFinite(numericAmount) || numericAmount <= 0 || numericAmount > 100000000) {
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0 || numericAmount > 21474836.47) {
       setError("Enter a valid amount greater than zero.");
       return;
     }
@@ -115,7 +115,7 @@ function GivePage() {
           </fieldset>
           <div className="space-y-2">
             <Label htmlFor="gift-amount">Amount (ZAR)</Label>
-            <Input id="gift-amount" type="number" inputMode="decimal" min="0.01" max="100000000" step="0.01" required placeholder="0.00" value={amount} onChange={(event) => setAmount(event.target.value)} className="h-16 bg-input text-2xl" />
+            <Input id="gift-amount" type="number" inputMode="decimal" min="0.01" max="21474836.47" step="0.01" required placeholder="0.00" value={amount} onChange={(event) => setAmount(event.target.value)} className="h-16 bg-input text-2xl" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="gift-email">Email <span className="font-normal text-muted-foreground">(for your payment receipt)</span></Label>

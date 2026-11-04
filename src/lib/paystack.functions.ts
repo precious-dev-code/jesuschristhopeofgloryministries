@@ -1,11 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
+import { confirmationStatus } from "./payment-status";
 
 const referenceSchema = z.string().regex(/^[A-Za-z0-9\-.=]{8,100}$/);
 
 const paymentInput = z.object({
-  amount: z.number().positive().max(100000000),
+  amount: z.number().positive().max(21474836.47),
   email: z.string().trim().email().max(255),
   type: z.enum(["Tithe", "Offering", "Special Project"]),
   name: z.string().trim().max(150),
@@ -30,7 +31,7 @@ export const initializePayment = createServerFn({ method: "POST" })
     const supabaseAdmin = await paystackAdmin();
     const reference = `GG-${randomUUID().toUpperCase()}`;
     const amountCents = Math.round(data.amount * 100);
-    if (!Number.isSafeInteger(amountCents) || amountCents <= 0) {
+    if (!Number.isSafeInteger(amountCents) || amountCents <= 0 || amountCents > 2147483647) {
       throw new Error("Enter a valid amount greater than zero.");
     }
 
@@ -67,12 +68,8 @@ export const initializePayment = createServerFn({ method: "POST" })
       | { status?: boolean; message?: string; data?: { authorization_url?: string } }
       | null;
     if (!response.ok || !body?.status || !body.data?.authorization_url) {
-      console.error(`Paystack initialize failed [${response.status}]: ${JSON.stringify(body)}`);
-      await supabaseAdmin
-        .from("gifts")
-        .update({ status: "Failed", confirmed_via: "initialize-error" })
-        .eq("reference", reference)
-        .eq("status", "Pending");
+      console.error(`Paystack initialize failed [${response.status}]`);
+      await supabaseAdmin.rpc("fail_gift", { p_reference: reference, p_via: "initialize-error" });
       throw new Error(body?.message ?? "Paystack could not start this payment.");
     }
     return { authorizationUrl: body.data.authorization_url };
@@ -100,31 +97,31 @@ export const verifyPayment = createServerFn({ method: "POST" })
         }
       | null;
     if (!response.ok || !body?.status) {
-      console.error(`Paystack verify failed [${response.status}]: ${JSON.stringify(body)}`);
+      console.error(`Paystack verify failed [${response.status}]`);
       throw new Error(body?.message ?? "Paystack could not confirm this payment.");
     }
 
     const state = body.data?.status;
     if (state === "success") {
-      const amount = typeof body.data?.amount === "number" ? Math.round(body.data.amount) : NaN;
+      const amount = typeof body.data?.amount === "number" ? body.data.amount : NaN;
       const currency = body.data?.currency ?? "";
-      const result = Number.isSafeInteger(amount) && currency
-        ? (await supabaseAdmin.rpc("confirm_gift", {
-            p_reference: data.reference,
-            p_amount_cents: amount,
-            p_currency: currency,
-            p_via: "return-verify",
-          })).data
-        : "Mismatch";
-      if (result === "Mismatch") {
-        console.error(`Paystack verify amount/currency mismatch for ${data.reference}`);
+      if (!Number.isSafeInteger(amount) || amount <= 0 || amount > 2147483647 || currency !== "ZAR") {
         return { status: "Pending" as const };
       }
-      return { status: "Paid" as const };
+      const { data: result, error } = await supabaseAdmin.rpc("confirm_gift", {
+        p_reference: data.reference,
+        p_amount_cents: amount,
+        p_currency: currency,
+        p_via: "return-verify",
+      });
+      if (error) throw new Error("Payment confirmation could not be saved. Please check Giving History shortly.");
+      return { status: confirmationStatus(result) };
     }
-    if (state === "failed" || state === "abandoned" || state === "reversed") {
-      await supabaseAdmin.rpc("fail_gift", { p_reference: data.reference, p_via: "return-verify" });
-      return { status: "Failed" as const };
+    if (state === "failed" || state === "abandoned") {
+      const { data: result, error } = await supabaseAdmin.rpc("fail_gift", { p_reference: data.reference, p_via: "return-verify" });
+      if (error) throw new Error("Payment status could not be saved. Please check Giving History shortly.");
+      return { status: result === "Failed" || result === "Already" ? "Failed" as const : "Pending" as const };
     }
     return { status: "Pending" as const };
   });
+
