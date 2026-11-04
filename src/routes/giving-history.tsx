@@ -1,12 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { History, RotateCcw } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { History, RotateCcw, ShieldCheck } from "lucide-react";
 import { GivingShell } from "@/components/GivingShell";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { givingTypes, useGifts, formatGiftAmount, giftDay } from "@/lib/giving";
+import { givingTypes, useGifts, formatGiftAmount, giftDay, type Gift } from "@/lib/giving";
+import { getFinanceGifts } from "@/lib/giving.functions";
 
 export const Route = createFileRoute("/giving-history")({
   head: () => ({ meta: [
@@ -22,12 +25,28 @@ export const Route = createFileRoute("/giving-history")({
 
 function GivingHistoryPage() {
   const { gifts, ready, error } = useGifts();
+  const fetchFinance = useServerFn(getFinanceGifts);
+  const [finance, setFinance] = useState<{ allowed: boolean; gifts: Gift[] } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session || cancelled) return;
+      try {
+        const result = await fetchFinance();
+        if (!cancelled) setFinance(result);
+      } catch { /* signed in without finance access */ }
+    })();
+    return () => { cancelled = true; };
+  }, [fetchFinance]);
+  const financeView = finance?.allowed === true;
+  const source = financeView ? finance!.gifts : gifts;
   const [type, setType] = useState("all");
   const [status, setStatus] = useState("all");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const invalidRange = Boolean(from && to && from > to);
-  const filtered = gifts.filter((gift) =>
+  const filtered = source.filter((gift) =>
     (type === "all" || gift.type === type) && (status === "all" || gift.status === status) &&
     (!from || giftDay(gift.date) >= from) && (!to || giftDay(gift.date) <= to),
   );
